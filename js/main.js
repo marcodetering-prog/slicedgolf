@@ -36,7 +36,7 @@
 
   /* ── Galerie-Filter ────────────────────────────── */
 
-  var filterBtns = document.querySelectorAll('.filter-btn');
+  var filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
   var artworkCards = document.querySelectorAll('.gallery-grid .artwork-card');
 
   function applyFilter(filter) {

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontakt — Sliced Golf</title>
-  <meta name="description" content="Anfragen zu Werken, Golf Lessons oder Presse — Kontakt zu Ralf Lehmann, Sliced Golf.">
-  <meta property="og:title" content="Kontakt — Sliced Golf">
-  <meta property="og:description" content="Anfragen zu Werken, Golf Lessons oder Presse — Kontakt zu Ralf Lehmann, Sliced Golf.">
+  <title>3D-Galerie — Sliced Golf</title>
+  <meta name="description" content="Die virtuelle Galerie von Sliced Golf. Bewegen Sie sich durch den Raum und betrachten Sie die Werke von Ralf Lehmann — wie in einer Ausstellung.">
+  <meta property="og:title" content="3D-Galerie — Sliced Golf">
+  <meta property="og:description" content="Die virtuelle Galerie von Sliced Golf. Bewegen Sie sich durch den Raum und betrachten Sie die Werke von Ralf Lehmann — wie in einer Ausstellung.">
   <meta property="og:image" content="https://slicedgolf.ch/og-image.jpg">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://slicedgolf.ch/kontakt/">
-  <link rel="canonical" href="https://slicedgolf.ch/kontakt/">
+  <meta property="og:url" content="https://slicedgolf.ch/galerie-3d/">
+  <link rel="canonical" href="https://slicedgolf.ch/galerie-3d/">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +57,7 @@
         <li><a href="/werke/">Werke</a></li>
         <li><a href="/kuenstler/">Künstler</a></li>
         <li><a href="/golf-pro/">Golf Pro</a></li>
-        <li><a href="/kontakt/" aria-current="page">Kontakt</a></li>
+        <li><a href="/kontakt/">Kontakt</a></li>
       </ul>
       <button class="nav-burger" aria-label="Navigation öffnen" aria-expanded="false">
         <span></span><span></span>
@@ -73,63 +73,33 @@
       <li><a href="/kontakt/">Kontakt</a></li>
     </ul>
   </div>
-  <main class="contact-main">
-    <div class="contact-inner">
-      <span class="section-label">Kontakt</span>
-      <h1 class="contact-title">Anfragen &amp; Gespräche</h1>
-      <form class="contact-form" action="/api/kontakt.php" method="POST">
-        <div class="form-hp" aria-hidden="true">
-          <label for="website">Website</label>
-          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="c-name">Name</label>
-          <input type="text" id="c-name" name="name" autocomplete="name" required>
-        </div>
-        <div class="form-group">
-          <label for="c-email">E-Mail</label>
-          <input type="email" id="c-email" name="email" autocomplete="email" required>
-        </div>
-        <div class="form-group">
-          <label for="c-betreff">Betreff</label>
-          <select id="c-betreff" name="betreff">
-            <option value="werk">Werk anfragen</option>
-            <option value="lesson">Golf Lesson</option>
-            <option value="presse">Presse</option>
-            <option value="sonstiges">Sonstiges</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="c-nachricht">Nachricht</label>
-          <textarea id="c-nachricht" name="nachricht" rows="6" required></textarea>
-        </div>
-        <button type="submit" class="btn-ghost">Nachricht senden</button>
-      </form>
+  <main class="g3d-main">
+    <div id="galerie3d" class="g3d-stage" aria-label="Virtuelle 3D-Galerie">
+      <noscript>
+        <p class="g3d-noscript">Die virtuelle Galerie benötigt JavaScript.
+        <a href="/werke/">Zu den Werken</a></p>
+      </noscript>
     </div>
+    <div id="g3d-loading" class="g3d-loading" aria-hidden="true">
+      <span class="section-label">Galerie wird geladen</span>
+    </div>
+    <p id="g3d-hint" class="g3d-hint">Ziehen zum Umsehen · Punkte auf dem Boden führen durch die Galerie · Werke anklicken</p>
+    <div class="g3d-themes" role="group" aria-label="Umgebung wählen">
+      <button class="filter-btn is-active" data-theme="white-cube">White Cube</button>
+      <button class="filter-btn" data-theme="salon">Salon</button>
+    </div>
+    <aside id="g3d-info" class="g3d-info" aria-live="polite">
+      <button id="g3d-info-close" class="g3d-info-close" aria-label="Schliessen">✕</button>
+      <h2 id="g3d-info-title" class="g3d-info-title"></h2>
+      <p id="g3d-info-meta" class="g3d-info-meta"></p>
+      <a id="g3d-info-link" class="text-link" href="/werke/">
+        Werk ansehen <span aria-hidden="true">→</span>
+      </a>
+    </aside>
   </main>
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <a href="/" class="footer-logo">SLICED GOLF</a>
-        <p class="footer-tagline">Handgefertigt in der Schweiz</p>
-      </div>
-      <nav class="footer-nav" aria-label="Footer-Navigation">
-        <a href="/werke/">Werke</a>
-        <a href="/werke/?filter=verfuegbar">Verfügbar</a>
-        <a href="/galerie-3d/">3D-Galerie</a>
-        <a href="/kuenstler/">Künstler</a>
-        <a href="/golf-pro/">Golf Pro</a>
-        <a href="/kontakt/">Kontakt</a>
-      </nav>
-      <div class="footer-contact">
-        <a href="mailto:kontakt@slicedgolf.ch">kontakt@slicedgolf.ch</a>
-        <a href="https://instagram.com/slicedgolf.ch" target="_blank" rel="noopener noreferrer">@slicedgolf.ch</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Ralf Lehmann / Sliced Golf</span>
-      <a href="/impressum/">Impressum</a>
-    </div>
-  </footer>
+  <script type="importmap">
+  { "imports": { "three": "/js/vendor/three.module.min.js" } }
+  </script>
+  <script type="module" src="/js/galerie-3d.js"></script>
 </body>
 </html>
