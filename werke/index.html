@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sliced Golf — Ralf Lehmann · Artist & PGA Master Professional</title>
-  <meta name="description" content="Kunstwerke aus dem Innern von Golfbällen. Handgefertigt in der Schweiz von PGA Master Professional Ralf Lehmann. Limitierte Editionen, Originalwerke.">
-  <meta property="og:title" content="Sliced Golf — Ralf Lehmann · Artist & PGA Master Professional">
-  <meta property="og:description" content="Kunstwerke aus dem Innern von Golfbällen. Handgefertigt in der Schweiz von PGA Master Professional Ralf Lehmann. Limitierte Editionen, Originalwerke.">
+  <title>Werke — Sliced Golf</title>
+  <meta name="description" content="Alle Kompositionen aus aufgeschnittenen Golfbällen. Limitierte Editionen von Ralf Lehmann.">
+  <meta property="og:title" content="Werke — Sliced Golf">
+  <meta property="og:description" content="Alle Kompositionen aus aufgeschnittenen Golfbällen. Limitierte Editionen von Ralf Lehmann.">
   <meta property="og:image" content="https://slicedgolf.ch/og-image.jpg">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://slicedgolf.ch/">
-  <link rel="canonical" href="https://slicedgolf.ch/">
+  <meta property="og:url" content="https://slicedgolf.ch/werke/">
+  <link rel="canonical" href="https://slicedgolf.ch/werke/">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +54,7 @@
         <span class="nav-wordmark">SLICED GOLF</span>
       </a>
       <ul class="nav-links">
-        <li><a href="/werke/">Werke</a></li>
+        <li><a href="/werke/" aria-current="page">Werke</a></li>
         <li><a href="/kuenstler/">Künstler</a></li>
         <li><a href="/golf-pro/">Golf Pro</a></li>
         <li><a href="/kontakt/">Kontakt</a></li>
@@ -74,78 +74,80 @@
     </ul>
   </div>
   <main>
-    <section class="hero" aria-label="Featured Artwork">
-      <div class="hero-stage">
-        <figure class="hero-artwork">
-          <img src="/images/artworks/darkroom-beleuchter.jpg" alt="Darkroom Beleuchter — Ralf Lehmann, Opus 13/99, 2023" width="1574" height="1600" loading="eager" fetchpriority="high">
-          <figcaption class="hero-caption">
-            <span class="hero-caption-title">Darkroom Beleuchter</span>
-            <span class="hero-caption-meta">OPUS 13/99 · 100 × 70 CM · 2023</span>
-          </figcaption>
-        </figure>
+    <section class="gallery-filters" aria-label="Werke filtern">
+      <div class="filters-inner">
+        <button class="filter-btn is-active" data-filter="alle">Alle</button>
+        <button class="filter-btn" data-filter="verfuegbar">Verfügbar</button>
       </div>
     </section>
-
-    <section class="statement" aria-label="Artist Statement">
-      <div class="statement-inner">
-        <span class="section-label">Ralf Lehmann · PGA Master Professional</span>
-        <h1 class="statement-tagline">
-          Jeder Ball trägt eine Farbe in sich.<br>Wir legen sie frei.
-        </h1>
-        <p class="statement-body">
-          Ralf Lehmann schneidet Golfbälle auf. Was er dabei freilegt, hat niemand
-          erwartet: Ein verborgenes Farbuniversum im Inneren jedes Balls — technisch
-          zufällig, künstlerisch einmalig. Handgefertigt in der Schweiz.
-        </p>
-        <a href="/kuenstler/" class="text-link">
-          Mehr über den Künstler <span aria-hidden="true">→</span>
+    <section aria-label="Alle Werke">
+      <div class="gallery-grid">
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/fairway-spektrum/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/fairway-spektrum-thumb.jpg" alt="Fairway Spektrum — Ralf Lehmann, Opus 16/99" loading="lazy" width="800" height="600">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Fairway Spektrum</h3>
+              <p class="artwork-card-meta">Opus 16/99 · 100 × 75 cm · 2024 · <span class="artwork-status">verfügbar</span></p>
+            </div>
+          </div>
         </a>
-      </div>
-    </section>
-
-    <section class="preview" aria-label="Ausgewählte Werke">
-      <div class="preview-inner">
-        <span class="section-label">Ausgewählte Werke</span>
-        <div class="preview-grid">
-          <article class="preview-item preview-item--large">
-          <a href="/werke/blumenwiese/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/blumenwiese-thumb.jpg" alt="Blumenwiese — Ralf Lehmann, Opus 21/99" loading="lazy" width="900" height="897">
+      </article>
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/rasta-mondrian-auf-wolke-7/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/rasta-mondrian-auf-wolke-7-thumb.jpg" alt="Rasta-Mondrian auf Wolke 7 — Ralf Lehmann, Opus 27/99" loading="lazy" width="799" height="800">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Rasta-Mondrian auf Wolke 7</h3>
+              <p class="artwork-card-meta">Opus 27/99 · 100 × 100 cm · 2024 · <span class="artwork-status">verfügbar</span></p>
             </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Blumenwiese</h3>
-              <p class="preview-meta">Opus 21/99 · 100 × 100 cm · 2025</p>
+          </div>
+        </a>
+      </article>
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/stille-wasser/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/stille-wasser.jpg" alt="Stille Wasser — Ralf Lehmann, Opus 31/99" loading="lazy" width="520" height="390">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Stille Wasser</h3>
+              <p class="artwork-card-meta">Opus 31/99 · 70 × 50 cm · 2025 · <span class="artwork-status">verfügbar</span></p>
             </div>
-          </a>
-        </article>
-          <article class="preview-item preview-item--small">
-          <a href="/werke/rasta-mondrian-auf-wolke-7/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/rasta-mondrian-auf-wolke-7-thumb.jpg" alt="Rasta-Mondrian auf Wolke 7 — Ralf Lehmann, Opus 27/99" loading="lazy" width="799" height="800">
+          </div>
+        </a>
+      </article>
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/blumenwiese/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/blumenwiese-thumb.jpg" alt="Blumenwiese — Ralf Lehmann, Opus 21/99" loading="lazy" width="900" height="897">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Blumenwiese</h3>
+              <p class="artwork-card-meta">Opus 21/99 · 100 × 100 cm · 2025 · <span class="artwork-status">verfügbar</span></p>
             </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Rasta-Mondrian auf Wolke 7</h3>
-              <p class="preview-meta">Opus 27/99 · 100 × 100 cm · 2024</p>
+          </div>
+        </a>
+      </article>
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/great-balls-of-fire/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/great-balls-of-fire-thumb.jpg" alt="Great Balls of Fire — Ralf Lehmann, Opus 18/99" loading="lazy" width="600" height="800">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Great Balls of Fire</h3>
+              <p class="artwork-card-meta">Opus 18/99 · 80 × 60 cm · 2024 · <span class="artwork-status">verfügbar</span></p>
             </div>
-          </a>
-        </article>
-          <article class="preview-item preview-item--medium">
-          <a href="/werke/fairway-spektrum/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/fairway-spektrum-thumb.jpg" alt="Fairway Spektrum — Ralf Lehmann, Opus 16/99" loading="lazy" width="800" height="600">
+          </div>
+        </a>
+      </article>
+      <article class="artwork-card" data-status="verfuegbar">
+        <a href="/werke/darkroom-beleuchter/" class="artwork-card-link">
+          <div class="artwork-card-visual">
+            <img src="/images/artworks/darkroom-beleuchter-thumb.jpg" alt="Darkroom Beleuchter — Ralf Lehmann, Opus 13/99" loading="lazy" width="885" height="900">
+            <div class="artwork-card-info" aria-hidden="true">
+              <h3 class="artwork-card-title">Darkroom Beleuchter</h3>
+              <p class="artwork-card-meta">Opus 13/99 · 100 × 70 cm · 2023 · <span class="artwork-status">verfügbar</span></p>
             </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Fairway Spektrum</h3>
-              <p class="preview-meta">Opus 16/99 · 100 × 75 cm · 2024</p>
-            </div>
-          </a>
-        </article>
-        </div>
-        <div class="preview-cta">
-          <a href="/werke/" class="text-link">
-            Alle Serien entdecken <span aria-hidden="true">→</span>
-          </a>
-        </div>
+          </div>
+        </a>
+      </article>
       </div>
     </section>
   </main>

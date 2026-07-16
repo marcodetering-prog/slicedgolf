@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /nachricht-gesendet/
+
+Sitemap: https://slicedgolf.ch/sitemap.xml

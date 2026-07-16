@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 320 320">
+  <defs>
+    <style>
+      .st0 { fill: #d0686f; }
+      .st1, .st2 { fill: #fff; }
+      .st1, .st3 { stroke: #030402; stroke-miterlimit: 10; }
+      .st4 { fill: #687ebc; }
+      .st3 { fill: none; }
+      .st5 { fill: #cb9e23; }
+      .st6 { clip-path: url(#clippath); }
+    </style>
+    <clipPath id="clippath">
+      <path class="st1" d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/>
+    </clipPath>
+  </defs>
+  <circle class="st0" cx="160" cy="160" r="88.1"/>
+  <circle class="st4" cx="160" cy="160" r="76"/>
+  <rect class="st3" x="16" y="16" width="288" height="288" rx="6" ry="6"/>
+  <circle class="st5" cx="160" cy="160" r="44.8"/>
+  <circle class="st3" cx="160" cy="160" r="104"/>
+  <line class="st3" x1="160" y1="56" x2="160" y2="264"/>
+  <path class="st3" d="M160,56c57.4,0,104,46.6,104,104s-46.6,104-104,104"/>
+  <g>
+    <path class="st2" d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/>
+    <g class="st6">
+      <rect class="st1" x="128" y="108" width="10" height="10" rx="5"/>
+      <rect class="st1" x="144" y="120" width="10" height="10" rx="5"/>
+      <rect class="st1" x="112" y="132" width="10" height="10" rx="5"/>
+      <rect class="st1" x="100" y="168" width="10" height="10" rx="5"/>
+      <rect class="st1" x="124" y="168" width="10" height="10" rx="5"/>
+      <rect class="st1" x="144" y="160" width="10" height="10" rx="5"/>
+      <rect class="st1" x="116" y="204" width="10" height="10" rx="5"/>
+      <rect class="st1" x="140" y="196" width="10" height="10" rx="5"/>
+      <rect class="st1" x="104" y="188" width="10" height="10" rx="5"/>
+    </g>
+    <path class="st3" d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/>
+  </g>
+  <line class="st3" x1="16" y1="188" x2="304" y2="188"/>
+  <line class="st3" x1="160" y1="16" x2="160" y2="304"/>
+</svg>
