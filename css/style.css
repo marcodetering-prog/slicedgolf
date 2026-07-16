@@ -1539,3 +1539,116 @@ a {
     max-width: none;
   }
 }
+
+.g3d-info-desc {
+  font-family: var(--font-functional);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--color-slate);
+  margin-bottom: var(--space-sm);
+}
+
+.g3d-anfrage {
+  display: none;
+  margin-top: var(--space-sm);
+}
+.g3d-anfrage.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Panels in der Galerie ─────────────────────────── */
+
+.g3d-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 92vw);
+  background: var(--color-white);
+  border-left: 0.5px solid var(--color-line);
+  padding: var(--space-2xl) var(--space-lg) var(--space-xl);
+  overflow-y: auto;
+  transform: translateX(102%);
+  transition: transform var(--transition-mid);
+  z-index: 50;
+}
+.g3d-panel.is-open {
+  transform: translateX(0);
+}
+
+.g3d-panel-close {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  font-family: var(--font-functional);
+  font-weight: 300;
+  font-size: 18px;
+  color: var(--color-caption);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+.g3d-panel-close:hover {
+  color: var(--color-depth);
+}
+
+.g3d-panel-title {
+  font-family: var(--font-identity);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px;
+  color: var(--color-depth);
+  margin-bottom: var(--space-lg);
+  line-height: 1.2;
+}
+
+.g3d-panel .bio-text p,
+.g3d-panel-body p {
+  font-family: var(--font-functional);
+  font-size: var(--text-body);
+  line-height: 1.7;
+  color: var(--color-slate);
+  margin-bottom: var(--space-md);
+}
+
+.g3d-panel img {
+  margin-bottom: var(--space-md);
+}
+
+.g3d-panel .credentials {
+  margin-top: var(--space-lg);
+}
+
+.g3d-werkliste {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.g3d-werkliste button {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--space-sm);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.g3d-werkliste img {
+  width: 96px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  margin: 0;
+}
+
+.g3d-werkliste .preview-title {
+  font-size: 14px;
+}

@@ -4,7 +4,7 @@
 declare(strict_types=1);
 require __DIR__ . '/_mail.php';
 
-$back = '/werke/';
+$back = '/';
 [$name, $email] = sg_guard($back);
 
 $werk      = sg_clean((string)($_POST['werk'] ?? ''), 200);

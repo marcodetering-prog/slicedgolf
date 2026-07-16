@@ -41,7 +41,7 @@ function sg_handle(string $subject, string $body, string $email, string $backPat
     );
 
     if ($ok) {
-        sg_redirect('/nachricht-gesendet/');
+        sg_redirect('/?gesendet=1');
     }
     // Versand fehlgeschlagen: zurück zum Formular
     sg_redirect($backPath . '?fehler=1');
@@ -54,7 +54,7 @@ function sg_guard(string $backPath): array
     }
     // Honeypot: Menschen sehen dieses Feld nicht
     if (!empty($_POST['website'])) {
-        sg_redirect('/nachricht-gesendet/'); // Bots freundlich verabschieden
+        sg_redirect('/?gesendet=1'); // Bots freundlich verabschieden
     }
 
     $name  = sg_clean((string)($_POST['name'] ?? ''), 120);

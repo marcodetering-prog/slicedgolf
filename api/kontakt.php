@@ -4,7 +4,7 @@
 declare(strict_types=1);
 require __DIR__ . '/_mail.php';
 
-$back = '/kontakt/';
+$back = '/';
 [$name, $email] = sg_guard($back);
 
 $betreffMap = [

@@ -22,10 +22,11 @@
   <div class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
     <button class="nav-overlay-close" aria-label="Navigation schliessen">✕</button>
     <ul class="nav-overlay-links">
-      <li><a href="/werke/">Werke</a></li>
-      <li><a href="/kuenstler/">Künstler</a></li>
-      <li><a href="/golf-pro/">Golf Pro</a></li>
-      <li><a href="/kontakt/">Kontakt</a></li>
+      <li><a href="#" data-panel="werke">Werke</a></li>
+      <li><a href="#" data-panel="kuenstler">Künstler</a></li>
+      <li><a href="#" data-panel="golf-pro">Golf Pro</a></li>
+      <li><a href="#" data-panel="kontakt">Kontakt</a></li>
+      <li><a href="/impressum/" style="font-size: 12px; text-transform: none; letter-spacing: 0.04em; font-weight: 300; color: #888888;">Impressum</a></li>
     </ul>
   </div>
   <main class="g3d-main g3d-main--full">
@@ -82,10 +83,175 @@
       <button id="g3d-info-close" class="g3d-info-close" aria-label="Schliessen">✕</button>
       <h2 id="g3d-info-title" class="g3d-info-title"></h2>
       <p id="g3d-info-meta" class="g3d-info-meta"></p>
-      <a id="g3d-info-link" class="text-link" href="/werke/">
-        Werk ansehen <span aria-hidden="true">→</span>
-      </a>
+      <p id="g3d-info-desc" class="g3d-info-desc"></p>
+      <button id="g3d-anfrage-toggle" class="text-link" type="button">
+        Werk anfragen <span aria-hidden="true">→</span>
+      </button>
+      <form id="g3d-anfrage" class="g3d-anfrage inquiry-form" action="/api/anfrage.php" method="POST">
+        <input type="hidden" id="g3d-anfrage-werk" name="werk" value="">
+        <div class="form-hp" aria-hidden="true">
+          <label for="g3d-hp">Website</label>
+          <input type="text" id="g3d-hp" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="g3d-name">Name</label>
+          <input type="text" id="g3d-name" name="name" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label for="g3d-email">E-Mail</label>
+          <input type="email" id="g3d-email" name="email" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label for="g3d-msg">Nachricht</label>
+          <textarea id="g3d-msg" name="nachricht" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn-ghost">Anfrage senden</button>
+      </form>
     </aside>
+
+    <aside id="panel-werke" class="g3d-panel" aria-label="Werke">
+      <button class="g3d-panel-close" aria-label="Schliessen">✕</button>
+      <span class="section-label">Werke</span>
+      <h2 class="g3d-panel-title">Die Sammlung</h2>
+      <ul class="g3d-werkliste">
+        <li>
+          <button type="button" data-goto="2">
+            <img src="/images/artworks/blumenwiese-thumb.jpg" alt="Blumenwiese" loading="lazy">
+            <span>
+              <span class="preview-title">Blumenwiese</span><br>
+              <span class="preview-meta">Opus 21/99 · 100 × 100 cm · 2025</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-goto="3">
+            <img src="/images/artworks/rasta-mondrian-auf-wolke-7-thumb.jpg" alt="Rasta-Mondrian auf Wolke 7" loading="lazy">
+            <span>
+              <span class="preview-title">Rasta-Mondrian auf Wolke 7</span><br>
+              <span class="preview-meta">Opus 27/99 · 100 × 100 cm · 2024</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-goto="4">
+            <img src="/images/artworks/darkroom-beleuchter-thumb.jpg" alt="Darkroom Beleuchter" loading="lazy">
+            <span>
+              <span class="preview-title">Darkroom Beleuchter</span><br>
+              <span class="preview-meta">Opus 13/99 · 100 × 70 cm · 2023</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-goto="5">
+            <img src="/images/artworks/fairway-spektrum-thumb.jpg" alt="Fairway Spektrum" loading="lazy">
+            <span>
+              <span class="preview-title">Fairway Spektrum</span><br>
+              <span class="preview-meta">Opus 16/99 · 100 × 75 cm · 2024</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" data-goto="6">
+            <img src="/images/artworks/stille-wasser.jpg" alt="Stille Wasser" loading="lazy">
+            <span>
+              <span class="preview-title">Stille Wasser</span><br>
+              <span class="preview-meta">Opus 31/99 · 70 × 50 cm · 2025</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+
+    <aside id="panel-kuenstler" class="g3d-panel" aria-label="Künstler">
+      <button class="g3d-panel-close" aria-label="Schliessen">✕</button>
+      <span class="section-label">Künstler</span>
+      <h2 class="g3d-panel-title">Ralf Lehmann</h2>
+      <img src="/images/ralf-lehmann-portrait.jpg" alt="Ralf Lehmann vor einem seiner Werke" loading="lazy" width="1166" height="956">
+      <div class="g3d-panel-body">
+        <p>Ralf Lehmann ist PGA Master Professional, Diplom-Sportpädagoge der
+        Universität Tübingen und seit über 25 Jahren als Golf Teaching Professional
+        tätig. Als Dozent für das Bundesamt für Sport Magglingen und Autor für
+        MagazinGolf.ch ist er eine etablierte Stimme im Schweizer Golf.</p>
+        <p>Die Kunst entstand aus einer professionellen Weiterbildung: Als Golfbälle
+        zu Analysezwecken aufgeschnitten wurden, erkannte Lehmann das verborgene
+        Farbuniversum im Innern jedes Balls. Seitdem sammelt er gebrauchte Bälle,
+        schneidet sie präzise auf, selektiert nach Farbe und Textur und arrangiert
+        sie zu grossformatigen Tafelwerken.</p>
+        <p>Sliced Golf entstand 2019. Jede Ballhälfte sitzt auf einem Magneten —
+        sie kann abgenommen, angeschaut und neu gesetzt werden. Alle verwendeten
+        Bälle sind Lakeballs.</p>
+      </div>
+      <dl class="credentials">
+        <div><dt>Swiss PGA</dt><dd>PGA Master Professional</dd></div>
+        <div><dt>Universität Tübingen</dt><dd>Dipl. Sportpädagoge</dd></div>
+        <div><dt>TPI</dt><dd>Zertifizierter Golf-Fitnesscoach</dd></div>
+        <div><dt>Bundesamt für Sport</dt><dd>Dozent, Magglingen</dd></div>
+        <div><dt>MagazinGolf.ch</dt><dd>Autor</dd></div>
+      </dl>
+    </aside>
+
+    <aside id="panel-golf-pro" class="g3d-panel" aria-label="Golf Pro">
+      <button class="g3d-panel-close" aria-label="Schliessen">✕</button>
+      <span class="section-label">Golf Pro</span>
+      <h2 class="g3d-panel-title">Unterricht &amp; Fitting</h2>
+      <div class="g3d-panel-body">
+        <p>Seit über 25 Jahren unterrichte ich Golf — als PGA Master Professional,
+        auf dem Platz und in der Ausbildung. Guter Unterricht beginnt mit einer
+        sauberen Analyse: Was macht der Schwung, was macht der Körper, was macht
+        das Material.</p>
+        <p><strong style="font-weight: 500;">Einzellektion</strong> — Technik, Kurzspiel, Putten.
+        Einzeln oder in kleinen Gruppen.</p>
+        <p><strong style="font-weight: 500;">Schlägerfitting</strong> — die passenden Schläger aus
+        dem Dschungel der Modelle, unabhängig und datenbasiert.</p>
+        <p><strong style="font-weight: 500;">Golf-Fitness (TPI)</strong> — Bewegungsanalyse und
+        Training. Das Ziel: ein Schwung, den der Körper mitmacht.</p>
+      </div>
+      <button type="button" class="btn-ghost" data-panel="kontakt">Lesson anfragen</button>
+      <p style="margin-top: 24px;">
+        <a href="https://www.magazingolf.ch" class="text-link text-link--secondary" target="_blank" rel="noopener noreferrer">
+          Artikel bei MagazinGolf.ch <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </aside>
+
+    <aside id="panel-kontakt" class="g3d-panel" aria-label="Kontakt">
+      <button class="g3d-panel-close" aria-label="Schliessen">✕</button>
+      <span class="section-label">Kontakt</span>
+      <h2 class="g3d-panel-title">Anfragen &amp; Gespräche</h2>
+      <form class="contact-form" action="/api/kontakt.php" method="POST">
+        <div class="form-hp" aria-hidden="true">
+          <label for="p-website">Website</label>
+          <input type="text" id="p-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="p-name">Name</label>
+          <input type="text" id="p-name" name="name" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label for="p-email">E-Mail</label>
+          <input type="email" id="p-email" name="email" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label for="p-betreff">Betreff</label>
+          <select id="p-betreff" name="betreff">
+            <option value="werk">Werk anfragen</option>
+            <option value="lesson">Golf Lesson</option>
+            <option value="presse">Presse</option>
+            <option value="sonstiges">Sonstiges</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="p-nachricht">Nachricht</label>
+          <textarea id="p-nachricht" name="nachricht" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn-ghost">Nachricht senden</button>
+      </form>
+      <p style="margin-top: 24px;">
+        <a href="mailto:kontakt@slicedgolf.ch" class="text-link text-link--secondary">kontakt@slicedgolf.ch</a><br>
+        <a href="https://instagram.com/slicedgolf.ch" class="text-link text-link--secondary" target="_blank" rel="noopener noreferrer">@slicedgolf.ch</a>
+      </p>
+    </aside>
+
     <div class="sr-only">
       <h1>Sliced Golf — Ralf Lehmann</h1>
       <p>Jeder Ball trägt eine Farbe in sich. Wir legen sie frei.
@@ -103,6 +269,6 @@
   <script type="importmap">
   { "imports": { "three": "/js/vendor/three.module.min.js" } }
   </script>
-  <script type="module" src="/js/galerie-3d.js"></script>
+  <script type="module" src="/js/galerie-pano.js"></script>
 </body>
 </html>
