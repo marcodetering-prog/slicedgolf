@@ -2,104 +2,12 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D-Galerie — Sliced Golf</title>
-  <meta name="description" content="Die virtuelle Galerie von Sliced Golf. Bewegen Sie sich durch den Raum und betrachten Sie die Werke von Ralf Lehmann — wie in einer Ausstellung.">
-  <meta property="og:title" content="3D-Galerie — Sliced Golf">
-  <meta property="og:description" content="Die virtuelle Galerie von Sliced Golf. Bewegen Sie sich durch den Raum und betrachten Sie die Werke von Ralf Lehmann — wie in einer Ausstellung.">
-  <meta property="og:image" content="https://slicedgolf.ch/og-image.jpg">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://slicedgolf.ch/galerie-3d/">
-  <link rel="canonical" href="https://slicedgolf.ch/galerie-3d/">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="/js/main.js" defer></script>
+  <meta http-equiv="refresh" content="0; url=/">
+  <link rel="canonical" href="https://slicedgolf.ch/">
+  <meta name="robots" content="noindex">
+  <title>Sliced Golf — Galerie</title>
 </head>
 <body>
-  <header class="site-header">
-    <nav class="site-nav">
-      <a href="/" class="nav-logo" aria-label="Sliced Golf — Startseite">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
-        <defs>
-          <clipPath id="sg-clip"><path d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/></clipPath>
-        </defs>
-        <circle fill="#d0686f" cx="160" cy="160" r="88.1"/>
-        <circle fill="#687ebc" cx="160" cy="160" r="76"/>
-        <rect fill="none" stroke="#030402" stroke-miterlimit="10" x="16" y="16" width="288" height="288" rx="6" ry="6"/>
-        <circle fill="#cb9e23" cx="160" cy="160" r="44.8"/>
-        <circle fill="none" stroke="#030402" stroke-miterlimit="10" cx="160" cy="160" r="104"/>
-        <line fill="none" stroke="#030402" stroke-miterlimit="10" x1="160" y1="56" x2="160" y2="264"/>
-        <path fill="none" stroke="#030402" stroke-miterlimit="10" d="M160,56c57.4,0,104,46.6,104,104s-46.6,104-104,104"/>
-        <g>
-          <path fill="#fff" d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/>
-          <g clip-path="url(#sg-clip)">
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="128" y="108" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="144" y="120" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="112" y="132" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="100" y="168" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="124" y="168" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="144" y="160" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="116" y="204" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="140" y="196" width="10" height="10" rx="5"/>
-            <rect fill="#fff" stroke="#030402" stroke-miterlimit="10" x="104" y="188" width="10" height="10" rx="5"/>
-          </g>
-          <path fill="none" stroke="#030402" stroke-miterlimit="10" d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/>
-        </g>
-        <line fill="none" stroke="#030402" stroke-miterlimit="10" x1="16" y1="188" x2="304" y2="188"/>
-        <line fill="none" stroke="#030402" stroke-miterlimit="10" x1="160" y1="16" x2="160" y2="304"/>
-      </svg>
-        <span class="nav-wordmark">SLICED GOLF</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="/werke/">Werke</a></li>
-        <li><a href="/kuenstler/">Künstler</a></li>
-        <li><a href="/golf-pro/">Golf Pro</a></li>
-        <li><a href="/kontakt/">Kontakt</a></li>
-      </ul>
-      <button class="nav-burger" aria-label="Navigation öffnen" aria-expanded="false">
-        <span></span><span></span>
-      </button>
-    </nav>
-  </header>
-  <div class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
-    <button class="nav-overlay-close" aria-label="Navigation schliessen">✕</button>
-    <ul class="nav-overlay-links">
-      <li><a href="/werke/">Werke</a></li>
-      <li><a href="/kuenstler/">Künstler</a></li>
-      <li><a href="/golf-pro/">Golf Pro</a></li>
-      <li><a href="/kontakt/">Kontakt</a></li>
-    </ul>
-  </div>
-  <main class="g3d-main">
-    <div id="galerie3d" class="g3d-stage" aria-label="Virtuelle 3D-Galerie">
-      <noscript>
-        <p class="g3d-noscript">Die virtuelle Galerie benötigt JavaScript.
-        <a href="/werke/">Zu den Werken</a></p>
-      </noscript>
-    </div>
-    <div id="g3d-loading" class="g3d-loading" aria-hidden="true">
-      <span class="section-label">Galerie wird geladen</span>
-    </div>
-    <p id="g3d-hint" class="g3d-hint">Ziehen zum Umsehen · Punkte auf dem Boden führen durch die Galerie · Werke anklicken</p>
-    <div class="g3d-themes" role="group" aria-label="Umgebung wählen">
-      <button class="filter-btn is-active" data-theme="white-cube">White Cube</button>
-      <button class="filter-btn" data-theme="salon">Salon</button>
-    </div>
-    <aside id="g3d-info" class="g3d-info" aria-live="polite">
-      <button id="g3d-info-close" class="g3d-info-close" aria-label="Schliessen">✕</button>
-      <h2 id="g3d-info-title" class="g3d-info-title"></h2>
-      <p id="g3d-info-meta" class="g3d-info-meta"></p>
-      <a id="g3d-info-link" class="text-link" href="/werke/">
-        Werk ansehen <span aria-hidden="true">→</span>
-      </a>
-    </aside>
-  </main>
-  <script type="importmap">
-  { "imports": { "three": "/js/vendor/three.module.min.js" } }
-  </script>
-  <script type="module" src="/js/galerie-3d.js"></script>
+  <p><a href="/">Zur Galerie</a></p>
 </body>
 </html>

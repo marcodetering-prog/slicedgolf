@@ -19,10 +19,27 @@
   <script src="/js/main.js" defer></script>
 </head>
 <body>
-  <header class="site-header">
-    <nav class="site-nav">
-      <a href="/" class="nav-logo" aria-label="Sliced Golf — Startseite">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
+  <div class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
+    <button class="nav-overlay-close" aria-label="Navigation schliessen">✕</button>
+    <ul class="nav-overlay-links">
+      <li><a href="/werke/">Werke</a></li>
+      <li><a href="/kuenstler/">Künstler</a></li>
+      <li><a href="/golf-pro/">Golf Pro</a></li>
+      <li><a href="/kontakt/">Kontakt</a></li>
+    </ul>
+  </div>
+  <main class="g3d-main g3d-main--full">
+    <div id="galerie3d" class="g3d-stage" aria-label="Virtuelle Galerie">
+      <noscript>
+        <p class="g3d-noscript">Die virtuelle Galerie benötigt JavaScript.
+        <a href="/werke/">Zu den Werken</a></p>
+      </noscript>
+    </div>
+    <div id="g3d-loading" class="g3d-loading" aria-hidden="true">
+      <span class="section-label">Galerie wird geladen</span>
+    </div>
+    <a href="/" class="g3d-brand g3d-chip" aria-label="Sliced Golf — Startseite">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
         <defs>
           <clipPath id="sg-clip"><path d="M160,56c-57.4,0-104,46.6-104,104s46.6,104,104,104V56Z"/></clipPath>
         </defs>
@@ -51,130 +68,41 @@
         <line fill="none" stroke="#030402" stroke-miterlimit="10" x1="16" y1="188" x2="304" y2="188"/>
         <line fill="none" stroke="#030402" stroke-miterlimit="10" x1="160" y1="16" x2="160" y2="304"/>
       </svg>
-        <span class="nav-wordmark">SLICED GOLF</span>
+      <span class="nav-wordmark">SLICED GOLF</span>
+    </a>
+    <div class="g3d-topbar">
+      <div class="g3d-themes g3d-chip" role="group" aria-label="Umgebung wählen">
+        <button class="filter-btn is-active" data-theme="white-cube">White Cube</button>
+        <button class="filter-btn" data-theme="salon">Salon</button>
+      </div>
+      <button class="nav-burger g3d-chip" aria-label="Navigation öffnen" aria-expanded="false">Menü</button>
+    </div>
+    <p id="g3d-hint" class="g3d-hint">Ziehen zum Umsehen · Punkte auf dem Boden führen durch die Galerie · Werke anklicken</p>
+    <aside id="g3d-info" class="g3d-info" aria-live="polite">
+      <button id="g3d-info-close" class="g3d-info-close" aria-label="Schliessen">✕</button>
+      <h2 id="g3d-info-title" class="g3d-info-title"></h2>
+      <p id="g3d-info-meta" class="g3d-info-meta"></p>
+      <a id="g3d-info-link" class="text-link" href="/werke/">
+        Werk ansehen <span aria-hidden="true">→</span>
       </a>
-      <ul class="nav-links">
-        <li><a href="/werke/">Werke</a></li>
-        <li><a href="/kuenstler/">Künstler</a></li>
+    </aside>
+    <div class="sr-only">
+      <h1>Sliced Golf — Ralf Lehmann</h1>
+      <p>Jeder Ball trägt eine Farbe in sich. Wir legen sie frei.
+      Ralf Lehmann schneidet Golfbälle auf. Was er dabei freilegt, hat niemand
+      erwartet: Ein verborgenes Farbuniversum im Inneren jedes Balls — technisch
+      zufällig, künstlerisch einmalig. Handgefertigt in der Schweiz.</p>
+      <ul>
+        <li><a href="/werke/">Alle Werke</a></li>
+        <li><a href="/kuenstler/">Über den Künstler</a></li>
         <li><a href="/golf-pro/">Golf Pro</a></li>
         <li><a href="/kontakt/">Kontakt</a></li>
       </ul>
-      <button class="nav-burger" aria-label="Navigation öffnen" aria-expanded="false">
-        <span></span><span></span>
-      </button>
-    </nav>
-  </header>
-  <div class="nav-overlay" aria-hidden="true" role="dialog" aria-label="Navigation">
-    <button class="nav-overlay-close" aria-label="Navigation schliessen">✕</button>
-    <ul class="nav-overlay-links">
-      <li><a href="/werke/">Werke</a></li>
-      <li><a href="/kuenstler/">Künstler</a></li>
-      <li><a href="/golf-pro/">Golf Pro</a></li>
-      <li><a href="/kontakt/">Kontakt</a></li>
-    </ul>
-  </div>
-  <main>
-    <section class="hero" aria-label="Featured Artwork">
-      <div class="hero-stage">
-        <figure class="hero-artwork">
-          <img src="/images/artworks/darkroom-beleuchter.jpg" alt="Darkroom Beleuchter — Ralf Lehmann, Opus 13/99, 2023" width="1574" height="1600" loading="eager" fetchpriority="high">
-          <figcaption class="hero-caption">
-            <span class="hero-caption-title">Darkroom Beleuchter</span>
-            <span class="hero-caption-meta">OPUS 13/99 · 100 × 70 CM · 2023</span>
-          </figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="statement" aria-label="Artist Statement">
-      <div class="statement-inner">
-        <span class="section-label">Ralf Lehmann · PGA Master Professional</span>
-        <h1 class="statement-tagline">
-          Jeder Ball trägt eine Farbe in sich.<br>Wir legen sie frei.
-        </h1>
-        <p class="statement-body">
-          Ralf Lehmann schneidet Golfbälle auf. Was er dabei freilegt, hat niemand
-          erwartet: Ein verborgenes Farbuniversum im Inneren jedes Balls — technisch
-          zufällig, künstlerisch einmalig. Handgefertigt in der Schweiz.
-        </p>
-        <a href="/kuenstler/" class="text-link">
-          Mehr über den Künstler <span aria-hidden="true">→</span>
-        </a>
-      </div>
-    </section>
-
-    <section class="preview" aria-label="Ausgewählte Werke">
-      <div class="preview-inner">
-        <span class="section-label">Ausgewählte Werke</span>
-        <div class="preview-grid">
-          <article class="preview-item preview-item--large">
-          <a href="/werke/blumenwiese/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/blumenwiese-thumb.jpg" alt="Blumenwiese — Ralf Lehmann, Opus 21/99" loading="lazy" width="900" height="897">
-            </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Blumenwiese</h3>
-              <p class="preview-meta">Opus 21/99 · 100 × 100 cm · 2025</p>
-            </div>
-          </a>
-        </article>
-          <article class="preview-item preview-item--small">
-          <a href="/werke/rasta-mondrian-auf-wolke-7/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/rasta-mondrian-auf-wolke-7-thumb.jpg" alt="Rasta-Mondrian auf Wolke 7 — Ralf Lehmann, Opus 27/99" loading="lazy" width="799" height="800">
-            </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Rasta-Mondrian auf Wolke 7</h3>
-              <p class="preview-meta">Opus 27/99 · 100 × 100 cm · 2024</p>
-            </div>
-          </a>
-        </article>
-          <article class="preview-item preview-item--medium">
-          <a href="/werke/fairway-spektrum/" class="preview-link">
-            <div class="preview-img-wrap">
-              <img src="/images/artworks/fairway-spektrum-thumb.jpg" alt="Fairway Spektrum — Ralf Lehmann, Opus 16/99" loading="lazy" width="800" height="600">
-            </div>
-            <div class="preview-info">
-              <h3 class="preview-title">Fairway Spektrum</h3>
-              <p class="preview-meta">Opus 16/99 · 100 × 75 cm · 2024</p>
-            </div>
-          </a>
-        </article>
-        </div>
-        <div class="preview-cta">
-          <a href="/werke/" class="text-link">
-            Alle Serien entdecken <span aria-hidden="true">→</span>
-          </a>
-          <a href="/galerie-3d/" class="text-link text-link--secondary" style="margin-left: 32px;">
-            Die Galerie in 3D besuchen <span aria-hidden="true">→</span>
-          </a>
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <a href="/" class="footer-logo">SLICED GOLF</a>
-        <p class="footer-tagline">Handgefertigt in der Schweiz</p>
-      </div>
-      <nav class="footer-nav" aria-label="Footer-Navigation">
-        <a href="/werke/">Werke</a>
-        <a href="/werke/?filter=verfuegbar">Verfügbar</a>
-        <a href="/galerie-3d/">3D-Galerie</a>
-        <a href="/kuenstler/">Künstler</a>
-        <a href="/golf-pro/">Golf Pro</a>
-        <a href="/kontakt/">Kontakt</a>
-      </nav>
-      <div class="footer-contact">
-        <a href="mailto:kontakt@slicedgolf.ch">kontakt@slicedgolf.ch</a>
-        <a href="https://instagram.com/slicedgolf.ch" target="_blank" rel="noopener noreferrer">@slicedgolf.ch</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Ralf Lehmann / Sliced Golf</span>
-      <a href="/impressum/">Impressum</a>
-    </div>
-  </footer>
+  <script type="importmap">
+  { "imports": { "three": "/js/vendor/three.module.min.js" } }
+  </script>
+  <script type="module" src="/js/galerie-3d.js"></script>
 </body>
 </html>
