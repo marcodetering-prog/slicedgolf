@@ -14,7 +14,7 @@ import * as THREE from 'three';
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ── Weltmodell (identisch zur Blender-Szene) ──── */
-  var W = 12, D = 8, EYE = 1.55, HANG = 1.58;
+  var D = 8, EYE = 1.55, HANG = 1.58;
 
   var WERKE = [
     { slug: 'blumenwiese', title: 'Blumenwiese',
@@ -401,9 +401,14 @@ import * as THREE from 'three';
       goToStation(parseInt(btn.dataset.goto, 10));
     });
   });
-  /* Bestätigung nach Formularversand */
-  if (new URLSearchParams(window.location.search).get('gesendet') === '1' && hint) {
+  /* Bestätigung bzw. Fehlermeldung nach Formularversand */
+  var params = new URLSearchParams(window.location.search);
+  if (hint && params.get('gesendet') === '1') {
     hint.textContent = 'Nachricht gesendet. Ralf Lehmann meldet sich persönlich.';
+    hint.classList.remove('is-done');
+    setTimeout(function () { hint.classList.add('is-done'); }, 7000);
+  } else if (hint && params.get('fehler') === '1') {
+    hint.textContent = 'Senden fehlgeschlagen. Bitte erneut versuchen oder per E-Mail an kontakt@slicedgolf.ch.';
     hint.classList.remove('is-done');
     setTimeout(function () { hint.classList.add('is-done'); }, 7000);
   }
