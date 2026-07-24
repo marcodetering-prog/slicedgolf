@@ -1,7 +1,11 @@
 /* SLICED GOLF — Fotorealistische Panorama-Galerie
    Street-View-Prinzip mit vorgerenderten 360°-Panoramen (Blender/Cycles,
-   echte globale Beleuchtung). Ziehen zum Umsehen, Punkte anklicken zum
-   Gehen, Werke anklicken für Details. Zwei Umgebungen. */
+   tools/render-gallery.py). Ziehen zum Umsehen, Punkte anklicken zum
+   Gehen, Werke anklicken für Details, Türen führen in andere Räume.
+
+   Räume: Foyer (Eingang), White Cube, Salon, Garten. Jeder Raum ist ein
+   eigener Panorama-Satz (/images/pano/<raum>-st<n>.jpg), die Stationen
+   und Werke eines Raums teilen dessen lokales Koordinatensystem. */
 
 import * as THREE from 'three';
 
@@ -13,10 +17,10 @@ import * as THREE from 'three';
 
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ── Weltmodell (identisch zur Blender-Szene) ──── */
-  var D = 8, EYE = 1.55, HANG = 1.58;
+  var EYE = 1.55, HANG = 1.58;
 
-  var WERKE = [
+  /* Die Sammlung — hängt im White Cube und im Salon */
+  var SAMMLUNG = [
     { slug: 'blumenwiese', title: 'Blumenwiese',
       meta: 'Opus 21/99 · 100 × 100 cm · 2025', x: -2.4, z: -4, w: 1.35, h: 1.35,
       desc: 'Mehrere hundert Ballhälften auf weissem Panel, ohne Raster nach Farbfamilien. Zufällig verteilt, in der Summe ein Feld.' },
@@ -34,7 +38,7 @@ import * as THREE from 'three';
       desc: 'Lakeballs, dem Wasser entnommen und zu einer Komposition aus Grün- und Graunuancen geordnet. Zurückhaltend, fast monochrom.' }
   ];
 
-  var STATIONS = [
+  var HALLE_STATIONS = [
     { x: 0,    z: 2.4 },
     { x: 0,    z: 0 },
     { x: -2.4, z: -1.9, werk: 'blumenwiese' },
@@ -44,16 +48,69 @@ import * as THREE from 'three';
     { x: -4.1, z: 0,    werk: 'stille-wasser' }
   ];
 
+  var ROOMS = {
+    'foyer': {
+      label: 'Foyer',
+      start: 0, face: { x: 0, z: -3 },
+      stations: [
+        { x: 0,   z: 1.2 },
+        { x: 2.4, z: 0 },
+        { x: 0,   z: -1.2 }
+      ],
+      werke: [],
+      doors: [
+        { x: 4, z: 0,  to: ['white-cube', 7] },
+        { x: 0, z: -3, to: ['salon', 7] }
+      ]
+    },
+    'white-cube': {
+      label: 'White Cube',
+      start: 0, face: { x: 0, z: -4 },
+      stations: HALLE_STATIONS.concat([
+        { x: 4.3, z: -2.0 },   // Tür Foyer
+        { x: 4.3, z: 2.0 }     // Tür Garten
+      ]),
+      werke: SAMMLUNG,
+      doors: [
+        { x: 6, z: -2, to: ['foyer', 1] },
+        { x: 6, z: 2,  to: ['garten', 0] }
+      ]
+    },
+    'salon': {
+      label: 'Salon',
+      start: 0, face: { x: 0, z: -4 },
+      stations: HALLE_STATIONS.concat([
+        { x: 4.3, z: 0 }       // Tür Foyer
+      ]),
+      werke: SAMMLUNG,
+      doors: [
+        { x: 6, z: 0, to: ['foyer', 2] }
+      ]
+    },
+    'garten': {
+      label: 'Garten',
+      start: 0, face: { x: 0, z: -3 },
+      stations: [
+        { x: 0, z: 4.2 },
+        { x: 0, z: -0.5 }
+      ],
+      werke: [],
+      doors: [
+        { x: 0, z: 6, to: ['white-cube', 8] }
+      ]
+    }
+  };
+
   /* Panorama-Ausrichtung: Bildmitte schaut nach Norden (three -z).
      PANO_OFFSET korrigiert die Texture-Drehung der Kugel. */
   var PANO_OFFSET = -Math.PI / 2;
 
-  var theme = new URLSearchParams(window.location.search).get('raum') === 'salon'
-    ? 'salon' : 'white-cube';
-  var station = 0;
+  var requested = new URLSearchParams(window.location.search).get('raum');
+  var room = ROOMS[requested] ? requested : 'foyer';
+  var station = ROOMS[room].start;
 
-  function panoUrl(th, st) {
-    return '/images/pano/' + th + '-st' + st + '.jpg';
+  function panoUrl(rm, st) {
+    return '/images/pano/' + rm + '-st' + st + '.jpg';
   }
 
   /* ── Szene ─────────────────────────────────────── */
@@ -84,10 +141,10 @@ import * as THREE from 'three';
   var active = sphereA;
 
   var texCache = {};
-  function loadPano(th, st, cb) {
-    var key = th + st;
+  function loadPano(rm, st, cb) {
+    var key = rm + st;
     if (texCache[key]) { cb(texCache[key]); return; }
-    loader.load(panoUrl(th, st), function (tex) {
+    loader.load(panoUrl(rm, st), function (tex) {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
       texCache[key] = tex;
@@ -95,7 +152,7 @@ import * as THREE from 'three';
     });
   }
 
-  /* ── Hotspots (Ringe am Boden, Klickflächen für Werke) ── */
+  /* ── Hotspots (Ringe am Boden, Türen, Klickflächen für Werke) ── */
   var hotspotScene = new THREE.Scene();
   var hotspotGroup = new THREE.Group();
   hotspotScene.add(hotspotGroup);
@@ -106,42 +163,74 @@ import * as THREE from 'three';
     return v.normalize();
   }
 
+  function upFacing(pos) {
+    return pos.clone().add(new THREE.Vector3(0, 1, 0));
+  }
+
   function rebuildHotspots() {
     while (hotspotGroup.children.length) hotspotGroup.remove(hotspotGroup.children[0]);
-    var st = STATIONS[station];
-    var light = theme === 'salon';
-    STATIONS.forEach(function (other, i) {
-      if (i === station) return;
-      var dist = Math.hypot(other.x - st.x, other.z - st.z);
-      if (dist > 5.2) return;                       // nur nahe Punkte zeigen
-      var dir = dirFromStation(st, other.x, 0, other.z);
-      var pos = dir.clone().multiplyScalar(24);
-      var k = 24 / Math.max(dist, 1.2);           // näher = grösser, wie Street View
+    var R = ROOMS[room];
+    var st = R.stations[station];
+    var light = room === 'salon';
+    var ringColor = light ? 0xfff2dc : 0x0a0a0a;
+
+    function addGroundMarker(pos, k, userData, isDoor) {
       var ring = new THREE.Mesh(
         new THREE.RingGeometry(0.30 * k, 0.42 * k, 40),
         new THREE.MeshBasicMaterial({
-          color: light ? 0xfff2dc : 0x0a0a0a,
-          transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthTest: false
+          color: ringColor, transparent: true, opacity: isDoor ? 0.55 : 0.35,
+          side: THREE.DoubleSide, depthTest: false
         })
       );
       ring.position.copy(pos);
-      ring.lookAt(pos.clone().add(new THREE.Vector3(0, 1, 0)));
+      ring.lookAt(upFacing(pos));
       ring.renderOrder = 2;
-      ring.userData.station = i;
       hotspotGroup.add(ring);
+      if (isDoor) {   // Türen: gefüllte Mitte als Unterscheidung
+        var dot = new THREE.Mesh(
+          new THREE.CircleGeometry(0.14 * k, 24),
+          new THREE.MeshBasicMaterial({
+            color: ringColor, transparent: true, opacity: 0.55,
+            side: THREE.DoubleSide, depthTest: false
+          })
+        );
+        dot.position.copy(pos);
+        dot.lookAt(upFacing(pos));
+        dot.renderOrder = 2;
+        hotspotGroup.add(dot);
+      }
       /* unsichtbare grosszügige Trefferfläche */
       var hit = new THREE.Mesh(
         new THREE.CircleGeometry(0.9 * k, 20),
         new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false })
       );
       hit.position.copy(pos);
-      hit.lookAt(pos.clone().add(new THREE.Vector3(0, 1, 0)));
+      hit.lookAt(upFacing(pos));
       hit.renderOrder = 2;
-      hit.userData.station = i;
+      for (var key in userData) hit.userData[key] = userData[key];
       hit.userData.ring = ring;
       hotspotGroup.add(hit);
+    }
+
+    R.stations.forEach(function (other, i) {
+      if (i === station) return;
+      var dist = Math.hypot(other.x - st.x, other.z - st.z);
+      if (dist > 6.5) return;                       // nur nahe Punkte zeigen
+      var dir = dirFromStation(st, other.x, 0, other.z);
+      var pos = dir.clone().multiplyScalar(24);
+      var k = 24 / Math.max(dist, 1.2);           // näher = grösser, wie Street View
+      addGroundMarker(pos, k, { station: i }, false);
     });
-    WERKE.forEach(function (wk) {
+
+    R.doors.forEach(function (door) {
+      var dist = Math.hypot(door.x - st.x, door.z - st.z);
+      var dir = dirFromStation(st, door.x, 0, door.z);
+      var pos = dir.clone().multiplyScalar(24);
+      var k = 24 / Math.max(dist, 1.2);
+      addGroundMarker(pos, k, { door: door.to }, true);
+    });
+
+    R.werke.forEach(function (wk) {
       var dir = dirFromStation(st, wk.x, HANG, wk.z);
       var pos = dir.clone().multiplyScalar(23);
       var dist = Math.hypot(wk.x - st.x, wk.z - st.z);
@@ -162,7 +251,7 @@ import * as THREE from 'three';
   var yaw = 0, pitch = 0, targetYaw = 0, targetPitch = 0;
 
   function faceWorldPoint(wx, wz) {
-    var st = STATIONS[station];
+    var st = ROOMS[room].stations[station];
     targetYaw = Math.atan2(wx - st.x, -(wz - st.z));
     var d = targetYaw - yaw;
     while (d > Math.PI) { targetYaw -= 2 * Math.PI; d = targetYaw - yaw; }
@@ -217,6 +306,8 @@ import * as THREE from 'three';
   function handleTap(e) {
     setPointer(e);
     var hits = ray.intersectObjects(hotspotGroup.children);
+    var doorHit = hits.find(function (h) { return h.object.userData.door; });
+    if (doorHit) { goDoor(doorHit.object.userData.door); return; }
     var stHit = hits.find(function (h) { return h.object.userData.station !== undefined; });
     if (stHit) { goToStation(stHit.object.userData.station); return; }
     var artHit = hits.find(function (h) { return h.object.userData.werk; });
@@ -224,19 +315,21 @@ import * as THREE from 'three';
     hideInfo();
   }
 
-  /* ── Stationswechsel (Überblendung) ────────────── */
+  /* ── Stations- & Raumwechsel (Überblendung) ────── */
   var fading = null;
 
-  function showStation(st, instant, faceWerk) {
-    loadPano(theme, st, function (tex) {
+  function showStation(rm, st, instant, faceWerk) {
+    loadPano(rm, st, function (tex) {
       var incoming = (active === sphereA) ? sphereB : sphereA;
       incoming.material.map = tex;
       incoming.material.needsUpdate = true;
       incoming.visible = true;
+      room = rm;
       station = st;
       rebuildHotspots();
+      syncRoomButtons();
       if (faceWerk) {
-        var wk = WERKE.find(function (w) { return w.slug === faceWerk; });
+        var wk = ROOMS[rm].werke.find(function (w) { return w.slug === faceWerk; });
         if (wk) faceWorldPoint(wk.x, wk.z);
       }
       if (instant || REDUCED) {
@@ -256,26 +349,43 @@ import * as THREE from 'three';
 
   function goToStation(i) {
     hideInfo();
-    var st = STATIONS[i];
-    showStation(i, false, st.werk);
+    var st = ROOMS[room].stations[i];
+    showStation(room, i, false, st.werk);
+  }
+
+  function goDoor(to) {
+    hideInfo();
+    faceWorldPoint(0, 0);          // Blick ins Zentrum des neuen Raums
+    showStation(to[0], to[1], false, null);
+  }
+
+  function applyRoom(name) {
+    if (!ROOMS[name]) return;
+    hideInfo();
+    var R = ROOMS[name];
+    showStation(name, R.start, false, null);
+    faceWorldPoint(R.face.x, R.face.z);
   }
 
   function preloadNeighbours() {
-    STATIONS.forEach(function (s, i) {
-      if (i !== station) loadPano(theme, i, function () {});
+    ROOMS[room].stations.forEach(function (s, i) {
+      if (i !== station) loadPano(room, i, function () {});
+    });
+    ROOMS[room].doors.forEach(function (door) {
+      loadPano(door.to[0], door.to[1], function () {});
     });
   }
 
-  /* ── Umgebungen ────────────────────────────────── */
-  function applyTheme(name) {
-    theme = (name === 'salon') ? 'salon' : 'white-cube';
+  /* ── Raum-Navigation (oben rechts) ─────────────── */
+  function syncRoomButtons() {
     document.querySelectorAll('.g3d-themes .filter-btn').forEach(function (b) {
-      b.classList.toggle('is-active', b.dataset.theme === theme);
+      b.classList.toggle('is-active', b.dataset.room === room);
     });
-    showStation(station, false, null);
   }
   document.querySelectorAll('.g3d-themes .filter-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () { applyTheme(btn.dataset.theme); });
+    btn.addEventListener('click', function () {
+      if (btn.dataset.room !== room) applyRoom(btn.dataset.room);
+    });
   });
 
   /* ── Info-Karte ────────────────────────────────── */
@@ -304,7 +414,7 @@ import * as THREE from 'three';
     });
   }
   function showInfoBySlug(slug) {
-    var wk = WERKE.find(function (w) { return w.slug === slug; });
+    var wk = ROOMS[room].werke.find(function (w) { return w.slug === slug; });
     if (wk) showInfo(wk);
   }
   function hideInfo() {
@@ -359,10 +469,11 @@ import * as THREE from 'three';
   }
   frame();
 
-  /* Start: Eingang, Blick zur Nordwand */
-  faceWorldPoint(0, -D / 2);
+  /* Start: Eingang (Foyer) oder ?raum=… */
+  var startFace = ROOMS[room].face;
+  faceWorldPoint(startFace.x, startFace.z);
   yaw = targetYaw; pitch = 0;
-  showStation(0, true, null);
+  showStation(room, station, true, null);
 
   var hint = document.getElementById('g3d-hint');
   if (hint) setTimeout(function () { hint.classList.add('is-done'); }, 6000);
@@ -394,11 +505,17 @@ import * as THREE from 'three';
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { closePanels(); hideInfo(); }
   });
-  /* Werk-Liste: hinspringen statt Seite wechseln */
+  /* Werk-Liste: hinspringen statt Seite wechseln. Werke hängen im
+     White Cube und im Salon — in Räumen ohne Werke geht es in den
+     White Cube. */
   document.querySelectorAll('[data-goto]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       closePanels();
-      goToStation(parseInt(btn.dataset.goto, 10));
+      var i = parseInt(btn.dataset.goto, 10);
+      var target = ROOMS[room].stations[i] && ROOMS[room].stations[i].werk
+        ? room : 'white-cube';
+      if (target !== room) { room = target; }
+      goToStation(i);
     });
   });
   /* Bestätigung bzw. Fehlermeldung nach Formularversand */
@@ -416,14 +533,14 @@ import * as THREE from 'three';
   /* API für Tests und Deep-Links */
   window.SG3D = {
     goTo: goToStation,
-    theme: applyTheme,
+    room: applyRoom,
     tap: handleTap,
     state: function () {
-      return { station: station, theme: theme, yaw: yaw,
+      return { room: room, station: station, yaw: yaw,
                hotspots: hotspotGroup.children.length };
     },
     project: function (x, y, z) {
-      var st = STATIONS[station];
+      var st = ROOMS[room].stations[station];
       var v = new THREE.Vector3(x - st.x, y - EYE, z - st.z).normalize()
         .multiplyScalar(20).project(camera);
       var r = renderer.domElement.getBoundingClientRect();
