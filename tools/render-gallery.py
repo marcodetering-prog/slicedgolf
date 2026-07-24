@@ -1,27 +1,25 @@
 """SLICED GOLF — Rendert alle Panoramen der virtuellen Galerie.
 
-Vier begehbare Räume, verbunden über Türen (Weltmodell in
-js/galerie-pano.js — dort stehen auch Stationen, Werke und Türen):
+Zwei Szenen mit identischem Grundriss (Weltmodell in js/galerie-pano.js):
 
-  foyer       Eingangshalle: warme Wände, Eichenboden, Bank, Pendants,
-              Portal nach draussen, Türen zu White Cube und Salon
-  white-cube  Weisse Halle mit Tonnengewölbe-Lichtdecke (12 x 8 m),
-              Türen zu Foyer und Garten
-  salon       Klassischer Salon: Stuckrahmen, Vertäfelung, Kassettendecke,
-              Kronleuchter, Westfenster, Tür zum Foyer
-  garten      Skulpturengarten: Rasen, Hecken, Bäume, Nishita-Himmel,
-              riesige aufgeschnittene Golfball-Skulptur, Portal zum
-              White Cube
+  white-cube-*  Weisse Galerie: Foyer, Haupthalle mit Tonnengewölbe-
+                Lichtdecke, Kabinett — verbunden über drei Türen
+  salon-*       Klassischer Salon: Foyer, Halle mit Stuckrahmen,
+                Vertäfelung, Kassettendecke, Kronleuchter und
+                Oberlicht, Kabinett — gleicher Grundriss
+  garten        Geteilter Skulpturengarten (Rasen, Hecken, Bäume,
+                Himmel, aufgeschnittene Golfball-Skulptur), Portal
+                zurück in die Halle der jeweiligen Szene
 
 Jedes Werk bekommt eine lesbare Wandplakette (Titel + Opus-Zeile).
 
 Aufruf:
   blender -b -P tools/render-gallery.py -- \
-      [--theme foyer|white-cube|salon|garten|all] [--only N] [--preview]
+      [--theme white-cube-halle|salon-halle|...|all] [--only N] [--preview]
 
 Achsen: Blender x = -three-x (gespiegelt, wie die Original-Panoramen),
-Blender y = three z (Nordwand bei y=-4), Blender z = Höhe. Bildmitte der
-Equirect = -Y. Werke-/Textpositionen sind daher x-negiert zum Weltmodell.
+Blender y = three z (Nordwand bei y=-D/2), Blender z = Höhe. Bildmitte
+der Equirect = -Y. Werkspositionen sind daher x-negiert zum Weltmodell.
 """
 
 import math
@@ -37,25 +35,24 @@ OUT_DIR = os.path.join(ROOT, 'images', 'pano')
 EYE = 1.55
 HANG = 1.58
 
-# Halle (White Cube & Salon): 12 x 8 m, Wände x=±6, y=±4
-HALL_W, HALL_D, HALL_H = 12.0, 8.0, 3.5
-# Foyer: 8 x 6 m, Wände x=±4, y=±3
-FOY_W, FOY_D, FOY_H = 8.0, 6.0, 3.2
-# Garten: 12 x 12 m Hecken
-GAR = 12.0
+HALL_W, HALL_D, HALL_H = 12.0, 8.0, 3.5   # Haupthalle
+KAB_W, KAB_D, KAB_H = 8.0, 6.0, 3.2       # Kabinett
+FOY_W, FOY_D, FOY_H = 8.0, 6.0, 3.2       # Foyer
+GAR = 12.0                                # Garten (Hecken)
+
+DOOR_W, DOOR_H = 1.0, 2.2
+PLAQ_W, PLAQ_H, PLAQ_Z = 0.44, 0.26, 1.30
 
 # Stationen in three-Koordinaten (x wird beim Rendern gespiegelt)
 HALL_ST = [(0.0, 2.4), (0.0, 0.0), (-2.4, -1.9), (2.4, -1.9),
-           (2.4, 1.9), (-2.4, 1.9), (-4.1, 0.0)]
-STATIONS = {
-    'foyer': [(0.0, 1.2), (2.4, 0.0), (0.0, -1.2)],
-    'white-cube': HALL_ST + [(4.3, -2.0), (4.3, 2.0)],
-    'salon': HALL_ST + [(4.3, 0.0)],
-    'garten': [(0.0, 4.2), (0.0, -0.5)],
-}
+           (2.4, 1.9), (-2.4, 1.9), (-4.1, 0.0),
+           (4.3, -2.0), (4.3, 0.0), (4.3, 2.0)]
+FOY_ST = [(0.0, 1.2), (2.4, 0.0)]
+KAB_ST = [(0.0, 1.0), (-1.8, -0.8), (2.6, 0.0)]
+GAR_ST = [(0.0, 4.2), (0.0, -0.5)]
 
-# Wand: 'n'/'s' = Nord/Süd (y=-4/+4), 'e' = Ost (x=+6). 'along' in Blender-x.
-WERKE = [
+# Werke der Halle: Wand 'n'/'s'/'e', 'along' in Blender-x
+HALL_WERKE = [
     dict(slug='blumenwiese', img='blumenwiese.jpg', wall='n', along=2.4,
          w=1.35, h=1.35, title='Blumenwiese',
          meta='Opus 21/99 · 100 × 100 cm · 2025'),
@@ -73,13 +70,18 @@ WERKE = [
          meta='Opus 31/99 · 70 × 50 cm · 2025'),
 ]
 
-# Fensteröffnungen Westwand Salon (y-Mitte, Breite, unten, oben)
-WINDOWS = [(-1.5, 1.1, 0.85, 3.05), (1.5, 1.1, 0.85, 3.05)]
-
-# Plakette neben dem Werk (lesbar aus ~2 m Betrachtungsdistanz)
-PLAQ_W, PLAQ_H, PLAQ_Z = 0.44, 0.26, 1.30
-
-DOOR_W, DOOR_H = 1.0, 2.2
+# Werke des Kabinetts
+KAB_WERKE = [
+    dict(slug='great-balls-of-fire', img='great-balls-of-fire.jpg', wall='n',
+         along=0.0, w=0.6, h=0.8, title='Great Balls of Fire',
+         meta='Opus 18/99 · 80 × 60 cm · 2024'),
+    dict(slug='ballhaelften-1', img='makro-ballhaelften-01.jpg', wall='e',
+         along=0.0, w=0.9, h=0.675, title='Ballhälften I', meta='Makrofotografie'),
+    dict(slug='ballhaelften-2', img='makro-ballhaelften-02.jpg', wall='s',
+         along=1.5, w=0.9, h=0.675, title='Ballhälften II', meta='Makrofotografie'),
+    dict(slug='ballhaelften-3', img='makro-ballhaelften-03.jpg', wall='s',
+         along=-1.5, w=0.9, h=0.675, title='Ballhälften III', meta='Makrofotografie'),
+]
 
 
 # ── Materialien ──────────────────────────────────────────
@@ -108,7 +110,7 @@ def mat_emission(name, color, strength):
 
 
 def mat_noise(name, dark, light, scale, rough, bump=0.2):
-    """Zweifarbige Noise-Textur (Parkett, Rasen, Hecke)."""
+    """Zweifarbige Noise-Textur (Böden, Rasen, Hecke)."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -135,15 +137,13 @@ def mat_floor_dark():
     """Dunkles Parkett mit Maserung, seidenmatt."""
     m = mat_noise('Parkett', (0.035, 0.018, 0.010), (0.16, 0.09, 0.045), 3.0, 0.38, 0.25)
     nt = m.node_tree
+    bsdf = nt.nodes['Principled BSDF']
     wave = nt.nodes.new('ShaderNodeTexWave')
     wave.wave_type = 'BANDS'
     wave.bands_direction = 'X'
     wave.inputs['Scale'].default_value = 5.0
     wave.inputs['Distortion'].default_value = 2.5
     wave.inputs['Detail'].default_value = 3.0
-    bsdf = nt.nodes['Principled BSDF']
-    mix = nt.nodes['ShaderNodeMixRGB'] if nt.nodes.get('ShaderNodeMixRGB') else None
-    # Maserung in die Basis-Färbung multiplizieren
     ramp2 = nt.nodes.new('ShaderNodeValToRGB')
     ramp2.color_ramp.elements[0].color = (0.5, 0.5, 0.5, 1)
     ramp2.color_ramp.elements[1].color = (1.0, 1.0, 1.0, 1)
@@ -183,63 +183,77 @@ def box(name, loc, dims, mat):
     return o
 
 
-def wall_with_door(prefix, wall, along, wall_len, wall_h, wall_pos, T, mat,
-                   frame_m, glow_m, glow_strength=1.5):
-    """Wand mit Türöffnung. wall: 'n'/'s' (laengs x) oder 'w'/'e' (laengs y).
-    wall_pos: fixe Achsposition der Wandmitte (y bzw. x)."""
-    a0, a1 = along - DOOR_W / 2, along + DOOR_W / 2
-    lo, hi = -wall_len / 2, wall_len / 2
-    segs = [(lo, a0), (a1, hi)]
-    for i, (a, b) in enumerate(segs):
-        mid, ln = (a + b) / 2, b - a
-        if ln <= 0.01:
-            continue
-        if wall in ('n', 's'):
-            box(prefix + '-seg%d' % i, (mid, wall_pos, wall_h / 2), (ln, T, wall_h), mat)
-        else:
-            box(prefix + '-seg%d' % i, (wall_pos, mid, wall_h / 2), (T, ln, wall_h), mat)
-    # Sturz über der Tür
-    if wall in ('n', 's'):
-        box(prefix + '-sturz', (along, wall_pos, (DOOR_H + wall_h) / 2),
-            (DOOR_W, T, wall_h - DOOR_H), mat)
-    else:
-        box(prefix + '-sturz', (wall_pos, along, (DOOR_H + wall_h) / 2),
-            (T, DOOR_W, wall_h - DOOR_H), mat)
-    # Laibung (Zargen) + Licht dahinter
+def wall_x(name, y_center, room_w, room_h, T, mat, openings=()):
+    """Wand entlang x (Nord/Süd) mit Rechteck-Öffnungen
+    [(mitte, breite, unten, oben)]."""
+    box(name, (0, y_center, room_h / 2), (room_w + 2 * T, T, room_h), mat)
+    if not openings:
+        return
+    bpy.context.view_layer.objects.active = bpy.data.objects[name]
+    wall = bpy.data.objects[name]
+    for i, (mitte, breite, unten, oben) in enumerate(openings):
+        h = oben - unten
+        cutter = box(name + '-cut%d' % i, (mitte, y_center, unten + h / 2),
+                     (breite, T * 3, h), None)
+        mod = wall.modifiers.new('cut%d' % i, 'BOOLEAN')
+        mod.operation = 'DIFFERENCE'
+        mod.object = cutter
+        bpy.context.view_layer.objects.active = wall
+        bpy.ops.object.modifier_apply(modifier='cut%d' % i)
+        bpy.data.objects.remove(cutter)
+
+
+def wall_y(name, x_center, room_d, room_h, T, mat, openings=()):
+    """Wand entlang y (West/Ost) mit Rechteck-Öffnungen."""
+    box(name, (x_center, 0, room_h / 2), (T, room_d, room_h), mat)
+    if not openings:
+        return
+    wall = bpy.data.objects[name]
+    for i, (mitte, breite, unten, oben) in enumerate(openings):
+        h = oben - unten
+        cutter = box(name + '-cut%d' % i, (x_center, mitte, unten + h / 2),
+                     (T * 3, breite, h), None)
+        mod = wall.modifiers.new('cut%d' % i, 'BOOLEAN')
+        mod.operation = 'DIFFERENCE'
+        mod.object = cutter
+        bpy.context.view_layer.objects.active = wall
+        bpy.ops.object.modifier_apply(modifier='cut%d' % i)
+        bpy.data.objects.remove(cutter)
+
+
+def door_frame(prefix, wall, along, room_w, room_d, frame_m, glow_color,
+               glow_strength, glow_dist=0.45):
+    """Zargen + Lichtquelle hinter einer Öffnung (Öffnung via wall_x/wall_y)."""
     fr = 0.06
-    if wall in ('n', 's'):
-        face = wall_pos + (T / 2 if wall == 'n' else -T / 2)
-        box(prefix + '-zarge-l', (a0, face, DOOR_H / 2), (fr, 0.1, DOOR_H), frame_m)
-        box(prefix + '-zarge-r', (a1, face, DOOR_H / 2), (fr, 0.1, DOOR_H), frame_m)
-        box(prefix + '-zarge-o', (along, face, DOOR_H), (DOOR_W + fr, 0.1, fr), frame_m)
-        depth = wall_pos + (0.55 if wall == 'n' else -0.55)
-        glow = mat_emission(prefix + '-licht', glow_m, glow_strength)
-        bpy.ops.mesh.primitive_plane_add(size=1, location=(along, depth, DOOR_H / 2),
+    if wall == 'n':
+        face = -room_d / 2 - 0.01
+        box(prefix + '-l', (along - DOOR_W / 2, face, DOOR_H / 2), (fr, 0.08, DOOR_H), frame_m)
+        box(prefix + '-r', (along + DOOR_W / 2, face, DOOR_H / 2), (fr, 0.08, DOOR_H), frame_m)
+        box(prefix + '-o', (along, face, DOOR_H), (DOOR_W + fr, 0.08, fr), frame_m)
+        glow = mat_emission(prefix + '-licht', glow_color, glow_strength)
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(along, -room_d / 2 - glow_dist, DOOR_H / 2),
                                          rotation=(math.pi / 2, 0, 0))
-        p = bpy.context.active_object
-        p.dimensions = (DOOR_W + 0.3, DOOR_H + 0.2, 1)
-    else:
-        face = wall_pos + (T / 2 if wall == 'w' else -T / 2)
-        box(prefix + '-zarge-l', (face, a0, DOOR_H / 2), (0.1, fr, DOOR_H), frame_m)
-        box(prefix + '-zarge-r', (face, a1, DOOR_H / 2), (0.1, fr, DOOR_H), frame_m)
-        box(prefix + '-zarge-o', (face, along, DOOR_H), (0.1, DOOR_W + fr, fr), frame_m)
-        depth = wall_pos + (0.55 if wall == 'w' else -0.55)
-        glow = mat_emission(prefix + '-licht', glow_m, glow_strength)
-        bpy.ops.mesh.primitive_plane_add(size=1, location=(depth, along, DOOR_H / 2),
+    else:  # 'w'
+        face = -room_w / 2 - 0.01
+        box(prefix + '-l', (face, along - DOOR_W / 2, DOOR_H / 2), (0.08, fr, DOOR_H), frame_m)
+        box(prefix + '-r', (face, along + DOOR_W / 2, DOOR_H / 2), (0.08, fr, DOOR_H), frame_m)
+        box(prefix + '-o', (face, along, DOOR_H), (0.08, DOOR_W + fr, fr), frame_m)
+        glow = mat_emission(prefix + '-licht', glow_color, glow_strength)
+        bpy.ops.mesh.primitive_plane_add(size=1, location=(-room_w / 2 - glow_dist, along, DOOR_H / 2),
                                          rotation=(math.pi / 2, 0, math.pi / 2))
-        p = bpy.context.active_object
-        p.dimensions = (DOOR_W + 0.3, DOOR_H + 0.2, 1)
+    p = bpy.context.active_object
+    p.dimensions = (DOOR_W + 0.3, DOOR_H + 0.2, 1)
     bpy.ops.object.transform_apply(scale=True)
     p.data.materials.append(glow)
 
 
-def art_plane(name, img_path, wall, along, w, h):
+def art_plane(name, img_path, wall, along, w, h, room_w, room_d):
     m = mat_art(img_path)
     bpy.ops.mesh.primitive_plane_add(size=1)
     o = bpy.context.active_object
     o.name = 'werk-' + name
     o.dimensions = (w, h, 1)
-    D2 = HALL_D / 2
+    D2, W2 = room_d / 2, room_w / 2
     if wall == 'n':
         o.location = (along, -D2 + 0.065, HANG)
         o.rotation_euler = (math.pi / 2, 0, math.pi)
@@ -247,7 +261,7 @@ def art_plane(name, img_path, wall, along, w, h):
         o.location = (along, D2 - 0.065, HANG)
         o.rotation_euler = (math.pi / 2, 0, 0)
     else:  # 'e'
-        o.location = (HALL_W / 2 - 0.065, along, HANG)
+        o.location = (W2 - 0.065, along, HANG)
         o.rotation_euler = (math.pi / 2, 0, -math.pi / 2)
     bpy.ops.object.transform_apply(scale=True)
     o.data.materials.append(m)
@@ -279,10 +293,10 @@ def text_obj(body, loc, rot, size, mat, font=None, extrude=0.001):
     return t
 
 
-def add_label(wk, plaque_m, ink_m):
+def add_label(wk, room_w, room_d, plaque_m, ink_m):
     """Lesbare Wandplakette rechts neben dem Werk (Betrachtersicht)."""
     wall, along, w = wk['wall'], wk['along'], wk['w']
-    D2, W2 = HALL_D / 2, HALL_W / 2
+    D2, W2 = room_d / 2, room_w / 2
     off = w / 2 + 0.10 + PLAQ_W / 2
     if wall == 'n':
         pos, dims, rot = (along - off, -D2 + 0.02, PLAQ_Z), (PLAQ_W, 0.015, PLAQ_H), (math.pi / 2, 0, math.pi)
@@ -298,9 +312,9 @@ def add_label(wk, plaque_m, ink_m):
     text_obj(wk['meta'], tpos(-0.052), rot, 0.021, ink_m, FONT_META)
 
 
-def add_werke(frame_m, plaque_m, ink_m):
-    D2, W2 = HALL_D / 2, HALL_W / 2
-    for wk in WERKE:
+def add_werke(werke, room_w, room_d, frame_m, plaque_m, ink_m):
+    D2, W2 = room_d / 2, room_w / 2
+    for wk in werke:
         wall, along, w, h = wk['wall'], wk['along'], wk['w'], wk['h']
         t = 0.05
         if wall in ('n', 's'):
@@ -308,22 +322,46 @@ def add_werke(frame_m, plaque_m, ink_m):
             box('rahmen-' + wk['slug'], (along, y, HANG), (w + 0.09, t, h + 0.09), frame_m)
         else:
             box('rahmen-' + wk['slug'], (W2 - t / 2 - 0.01, along, HANG), (t, w + 0.09, h + 0.09), frame_m)
-        art_plane(wk['slug'], os.path.join(ART_DIR, wk['img']), wall, along, w, h)
-        add_label(wk, plaque_m, ink_m)
+        art_plane(wk['slug'], os.path.join(ART_DIR, wk['img']), wall, along, w, h,
+                  room_w, room_d)
+        add_label(wk, room_w, room_d, plaque_m, ink_m)
 
 
-def add_walltext(ink_m, x=-4.0, y=None, z=1.85, sub=1.58):
+def add_walltext(ink_m, x, y, z=1.85, sub=1.58):
     rot = (math.pi / 2, 0, math.pi)
-    if y is None:
-        y = -HALL_D / 2 + 0.02
     text_obj('SLICED GOLF', (x, y, z), rot, 0.3, ink_m, FONT_META, 0.002)
     text_obj('Ralf Lehmann', (x, y, sub), rot, 0.13, ink_m, FONT_META, 0.002)
 
 
-# ── White Cube ───────────────────────────────────────────
+def point_light(loc, energy, color, size=0.15):
+    bpy.ops.object.light_add(type='POINT', location=loc)
+    l = bpy.context.active_object
+    l.data.energy = energy
+    l.data.color = color
+    l.data.shadow_soft_size = size
 
-def build_white_cube():
-    wall_m = mat_principled('WandWeiss', (0.93, 0.93, 0.92), 0.9)
+
+def area_light(loc, rot, energy, color, size):
+    bpy.ops.object.light_add(type='AREA', location=loc, rotation=rot)
+    l = bpy.context.active_object
+    l.data.energy = energy
+    l.data.color = color
+    l.data.size = size
+
+
+def grey_world(strength, color=(0.35, 0.35, 0.38)):
+    world = bpy.data.worlds.new('Welt')
+    world.use_nodes = True
+    bg = world.node_tree.nodes['Background']
+    bg.inputs['Color'].default_value = (*color, 1)
+    bg.inputs['Strength'].default_value = strength
+    bpy.context.scene.world = world
+
+
+# ── White Cube: Halle ────────────────────────────────────
+
+def build_wc_halle():
+    wall_m = mat_principled('wand', (0.93, 0.93, 0.92), 0.9)
     ceil_m = mat_principled('DeckeWeiss', (0.95, 0.95, 0.94), 0.9)
     mullion = mat_principled('Sprossen', (0.28, 0.28, 0.29), 0.5)
     floor_m = mat_principled('BodenWeiss', (0.62, 0.615, 0.60), 0.42)
@@ -336,24 +374,17 @@ def build_white_cube():
     T = 0.12
 
     box('boden', (0, 0, -0.05), (HALL_W, HALL_D, 0.1), floor_m)
-    for tag, loc, dims in (
-            ('n', (0, -D2 - T / 2, H / 2), (HALL_W + 2 * T, T, H)),
-            ('s', (0, D2 + T / 2, H / 2), (HALL_W + 2 * T, T, H)),
-            ('e', (W2 + T / 2, 0, H / 2), (T, HALL_D, H))):
-        box('wand-' + tag, loc, dims, wall_m)
+    wall_x('wand-n', -D2 - T / 2, HALL_W, H, T, wall_m)
+    wall_x('wand-s', D2 + T / 2, HALL_W, H, T, wall_m)
+    wall_y('wand-e', W2 + T / 2, HALL_D, H, T, wall_m)
 
-    # Westwand: Tür zum Foyer (y=-2) und Tür zum Garten (y=+2)
-    Tm = T / 2
-    wall_with_door('tuer-foyer', 'w', -2.0, HALL_D, H, -W2 - Tm, T, wall_m,
-                   mullion, (1.0, 0.95, 0.88), 1.6)
-    wall_with_door('tuer-garten', 'w', 2.0, HALL_D, H, -W2 - Tm, T, wall_m,
-                   mullion, (0.85, 0.95, 1.0), 2.5)
-    # Wandstücke zwischen/um die Türen
-    for i, (a, b) in enumerate([(-D2, -2.0 - DOOR_W / 2),
-                                (-2.0 + DOOR_W / 2, 2.0 - DOOR_W / 2),
-                                (2.0 + DOOR_W / 2, D2)]):
-        if b - a > 0.01:
-            box('wand-w-%d' % i, (-W2 - Tm, (a + b) / 2, H / 2), (T, b - a, H), wall_m)
+    # Westwand: Türen zu Foyer (-2), Garten (0), Kabinett (+2)
+    wall_y('wand-w', -W2 - T / 2, HALL_D, H, T, wall_m,
+           openings=[(-2.0, DOOR_W, 0, DOOR_H), (0.0, DOOR_W, 0, DOOR_H),
+                     (2.0, DOOR_W, 0, DOOR_H)])
+    door_frame('tuer-foyer', 'w', -2.0, HALL_W, HALL_D, mullion, (1.0, 0.95, 0.88), 1.6)
+    door_frame('tuer-garten', 'w', 0.0, HALL_W, HALL_D, mullion, (0.85, 0.95, 1.0), 2.5)
+    door_frame('tuer-kabinett', 'w', 2.0, HALL_W, HALL_D, mullion, (1.0, 0.95, 0.88), 1.6)
 
     box('decke-n', (0, -3.62, H + 0.05), (HALL_W + 2 * T, 1.24, 0.1), ceil_m)
     box('decke-s', (0, 3.62, H + 0.05), (HALL_W + 2 * T, 1.24, 0.1), ceil_m)
@@ -378,35 +409,21 @@ def build_white_cube():
             arc = box('bogen', (x, y, z - 0.015), (0.055, 0.75, 0.035), mullion)
             arc.rotation_euler = (t, 0, 0)
 
-    add_werke(frame_m, plaque_m, ink_m)
-    add_walltext(ink_m)
+    add_werke(HALL_WERKE, HALL_W, HALL_D, frame_m, plaque_m, ink_m)
+    add_walltext(ink_m, -4.0, -D2 + 0.02)
 
 
-def lights_white_cube():
-    bpy.ops.object.light_add(type='AREA', location=(0, 0, 3.65))
-    key = bpy.context.active_object
-    key.data.energy = 480
-    key.data.color = (1.0, 1.0, 1.0)
-    key.data.size = 5.0
-    for y in (-2.0, 2.0):
-        bpy.ops.object.light_add(type='POINT', location=(0, y, 2.8))
-        l = bpy.context.active_object
-        l.data.energy = 130
-        l.data.color = (1.0, 1.0, 1.0)
-        l.data.shadow_soft_size = 0.2
-
-    world = bpy.data.worlds.new('Welt')
-    world.use_nodes = True
-    bg = world.node_tree.nodes['Background']
-    bg.inputs['Color'].default_value = (0.9, 0.9, 0.9, 1)
-    bg.inputs['Strength'].default_value = 0.3
-    bpy.context.scene.world = world
+def lights_wc_halle():
+    area_light((0, 0, 3.65), (0, 0, 0), 480, (1.0, 1.0, 1.0), 5.0)
+    point_light((0, -2.0, 2.8), 130, (1.0, 1.0, 1.0), 0.2)
+    point_light((0, 2.0, 2.8), 130, (1.0, 1.0, 1.0), 0.2)
+    grey_world(0.3, (0.9, 0.9, 0.9))
 
 
-# ── Salon ────────────────────────────────────────────────
+# ── Salon: Halle ─────────────────────────────────────────
 
-def build_salon():
-    sage = mat_principled('Salbeigruen', (0.283, 0.306, 0.235), 0.85)
+def build_salon_halle():
+    sage = mat_principled('wand', (0.283, 0.306, 0.235), 0.85)
     wainscot = mat_principled('Vertaefelung', (0.153, 0.176, 0.129), 0.7)
     cream = mat_principled('Stuck', (0.75, 0.71, 0.62), 0.55)
     wood = mat_principled('Dunkelholz', (0.075, 0.045, 0.026), 0.45)
@@ -425,52 +442,33 @@ def build_salon():
     box('boden', (0, 0, -0.05), (HALL_W, HALL_D, 0.1), floor_m)
     box('decke', (0, 0, H + 0.05), (HALL_W + 2 * T, HALL_D + 2 * T, 0.1), white)
 
-    box('wand-n', (0, -D2 - T / 2, H / 2), (HALL_W + 2 * T, T, H), sage)
-    box('wand-s', (0, D2 + T / 2, H / 2), (HALL_W + 2 * T, T, H), sage)
-    box('wand-e', (W2 + T / 2, 0, H / 2), (T, HALL_D, H), sage)
-
-    # Westwand: zwei Fenster, dazwischen die Tür zum Foyer
-    wb = WINDOWS[0][1]
-    door_lo, door_hi = -DOOR_W / 2, DOOR_W / 2
-    segs = [(-D2, WINDOWS[0][0] - wb / 2),
-            (WINDOWS[0][0] + wb / 2, door_lo),
-            (door_hi, WINDOWS[1][0] - wb / 2),
-            (WINDOWS[1][0] + wb / 2, D2)]
-    for i, (a, b) in enumerate(segs):
-        if b - a > 0.01:
-            box('west-seg%d' % i, (-W2 - T / 2, (a + b) / 2, H / 2), (T, b - a, H), sage)
-    # Türsturz + Laibung + warmes Licht dahinter
-    box('tuer-sturz', (-W2 - T / 2, 0, (DOOR_H + H) / 2), (T, DOOR_W, H - DOOR_H), sage)
-    box('tuer-zarge-l', (-W2 + 0.01, door_lo, DOOR_H / 2), (0.06, 0.05, DOOR_H), wood)
-    box('tuer-zarge-r', (-W2 + 0.01, door_hi, DOOR_H / 2), (0.06, 0.05, DOOR_H), wood)
-    box('tuer-zarge-o', (-W2 + 0.01, 0, DOOR_H), (0.06, DOOR_W + 0.05, 0.05), wood)
-    glow_door = mat_emission('tuer-licht', (1.0, 0.88, 0.68), 1.8)
-    bpy.ops.mesh.primitive_plane_add(size=1, location=(-W2 - 0.55, 0, DOOR_H / 2),
-                                     rotation=(math.pi / 2, 0, math.pi / 2))
+    # Nordwand mit Oberlicht über der Mitte (x=0, z 2.4–3.2)
+    wall_x('wand-n', -D2 - T / 2, HALL_W, H, T, sage,
+           openings=[(0.0, 1.6, 2.4, 3.2)])
+    box('ol-rahmen-l', (-0.8, -D2 - 0.01, 2.8), (0.06, 0.1, 0.8), cream)
+    box('ol-rahmen-r', (0.8, -D2 - 0.01, 2.8), (0.06, 0.1, 0.8), cream)
+    box('ol-rahmen-o', (0, -D2 - 0.01, 3.2), (1.66, 0.1, 0.06), cream)
+    box('ol-rahmen-u', (0, -D2 - 0.01, 2.4), (1.66, 0.1, 0.06), cream)
+    box('ol-sprosse', (0, -D2 - 0.005, 2.8), (0.03, 0.05, 0.8), cream)
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, -D2 - 0.4, 2.8),
+                                     rotation=(math.pi / 2, 0, 0))
     p = bpy.context.active_object
-    p.dimensions = (DOOR_W + 0.3, DOOR_H + 0.2, 1)
+    p.dimensions = (2.0, 1.2, 1)
     bpy.ops.object.transform_apply(scale=True)
-    p.data.materials.append(glow_door)
+    p.data.materials.append(sky)
 
-    for yc, b, u, o in WINDOWS:
-        box('sturz', (-W2 - T / 2, yc, (o + H) / 2), (T, b, H - o), sage)
-        box('bruestung', (-W2 - T / 2, yc, u / 2), (T, b, u), sage)
-        fr = 0.05
-        box('f-rahmen-l', (-W2 + 0.01, yc - b / 2, (u + o) / 2), (0.06, fr, o - u), cream)
-        box('f-rahmen-r', (-W2 + 0.01, yc + b / 2, (u + o) / 2), (0.06, fr, o - u), cream)
-        box('f-rahmen-o', (-W2 + 0.01, yc, o), (0.06, b + fr, fr), cream)
-        box('f-rahmen-u', (-W2 + 0.01, yc, u), (0.06, b + fr, fr), cream)
-        box('f-sprosse-v', (-W2 + 0.005, yc, (u + o) / 2), (0.03, 0.025, o - u), cream)
-        box('f-sprosse-h', (-W2 + 0.005, yc, (u + o) / 2), (0.03, b, 0.025), cream)
-        box('fensterbank', (-W2 + 0.03, yc, u - 0.02), (0.14, b + 0.1, 0.04), cream)
-        bpy.ops.mesh.primitive_plane_add(size=1, location=(-W2 - 0.35, yc, (u + o) / 2),
-                                         rotation=(math.pi / 2, 0, math.pi / 2))
-        p = bpy.context.active_object
-        p.name = 'himmel'
-        p.dimensions = (b + 0.4, o - u + 0.4, 1)
-        bpy.ops.object.transform_apply(scale=True)
-        p.data.materials.append(sky)
+    wall_x('wand-s', D2 + T / 2, HALL_W, H, T, sage)
+    wall_y('wand-e', W2 + T / 2, HALL_D, H, T, sage)
 
+    # Westwand: Türen zu Foyer (-2), Garten (0), Kabinett (+2)
+    wall_y('wand-w', -W2 - T / 2, HALL_D, H, T, sage,
+           openings=[(-2.0, DOOR_W, 0, DOOR_H), (0.0, DOOR_W, 0, DOOR_H),
+                     (2.0, DOOR_W, 0, DOOR_H)])
+    door_frame('tuer-foyer', 'w', -2.0, HALL_W, HALL_D, wood, (1.0, 0.88, 0.68), 1.8)
+    door_frame('tuer-garten', 'w', 0.0, HALL_W, HALL_D, wood, (0.85, 0.95, 1.0), 2.5)
+    door_frame('tuer-kabinett', 'w', 2.0, HALL_W, HALL_D, wood, (1.0, 0.88, 0.68), 1.8)
+
+    # Vertäfelung, Stuhlleiste, Sockel — an N, S, E
     for tag, (cx, cy, dx, dy) in {
         'n': (0, -D2 + 0.012, HALL_W, 0.024),
         's': (0, D2 - 0.012, HALL_W, 0.024),
@@ -495,12 +493,14 @@ def build_salon():
             for (yy, z) in [(center - pw / 2, pz), (center + pw / 2, pz)]:
                 box('stuck', (x, yy, z), (sd, sw, ph), cream)
 
-    for wall in ('n', 's'):
-        for c in (-4.5, -1.5, 1.5, 4.5):
-            panel(wall, c, 2.4)
+    for c in (-4.2, -2.0, 2.0, 4.2):     # Nord: Oberlicht bleibt frei
+        panel('n', c, 2.0)
+    for c in (-4.5, -1.5, 1.5, 4.5):
+        panel('s', c, 2.4)
     for c in (-2.6, 0.0, 2.6):
         panel('e', c, 2.0)
 
+    # Kassettendecke
     for i in range(5):
         x = -W2 + i * (HALL_W / 4)
         box('balken-x', (x, 0, H - 0.075), (0.14, HALL_D, 0.15), cream)
@@ -508,6 +508,7 @@ def build_salon():
         y = -D2 + j * (HALL_D / 3)
         box('balken-y', (0, y, H - 0.075), (HALL_W, 0.14, 0.15), cream)
 
+    # Kronleuchter
     box('kette', (0, 0, H - 0.5), (0.02, 0.02, 1.0), gold)
     bpy.ops.mesh.primitive_torus_add(major_radius=0.42, minor_radius=0.03,
                                      location=(0, 0, H - 0.95))
@@ -524,47 +525,27 @@ def build_salon():
         f.name = 'flamme'
         f.data.materials.append(flame)
 
-    add_werke(frame_m, plaque_m, ink_m)
-    add_walltext(ink_m)
+    add_werke(HALL_WERKE, HALL_W, HALL_D, frame_m, plaque_m, ink_m)
+    add_walltext(ink_m, -4.0, -D2 + 0.02)
 
 
-def lights_salon():
-    def point(loc, energy, color):
-        bpy.ops.object.light_add(type='POINT', location=loc)
-        l = bpy.context.active_object
-        l.data.energy = energy
-        l.data.color = color
-        l.data.shadow_soft_size = 0.15
-
-    def area(loc, rot, energy, color, size):
-        bpy.ops.object.light_add(type='AREA', location=loc, rotation=rot)
-        l = bpy.context.active_object
-        l.data.energy = energy
-        l.data.color = color
-        l.data.size = size
-
-    point((0, 0, HALL_H - 1.0), 320, (1.0, 0.8, 0.58))
-    point((0, -2.0, 2.9), 90, (1.0, 0.94, 0.85))
-    point((0, 2.0, 2.9), 90, (1.0, 0.94, 0.85))
-    for yc, *_ in WINDOWS:
-        area((-HALL_W / 2 - 0.9, yc, 2.0), (0, -math.pi / 2, 0), 500, (0.88, 0.94, 1.0), 1.8)
-
-    world = bpy.data.worlds.new('Welt')
-    world.use_nodes = True
-    bg = world.node_tree.nodes['Background']
-    bg.inputs['Color'].default_value = (0.32, 0.33, 0.35, 1)
-    bg.inputs['Strength'].default_value = 0.35
-    bpy.context.scene.world = world
+def lights_salon_halle():
+    point_light((0, 0, HALL_H - 1.0), 320, (1.0, 0.8, 0.58))
+    point_light((0, -2.0, 2.9), 90, (1.0, 0.94, 0.85))
+    point_light((0, 2.0, 2.9), 90, (1.0, 0.94, 0.85))
+    area_light((0, -HALL_D / 2 - 0.9, 2.8), (math.pi / 2, 0, math.pi), 350,
+               (0.88, 0.94, 1.0), 1.5)
+    grey_world(0.35, (0.32, 0.33, 0.35))
 
 
-# ── Foyer ────────────────────────────────────────────────
+# ── Foyer & Kabinett (pro Szene gestylt) ─────────────────
 
-def build_foyer():
-    wall_m = mat_principled('FoyerWand', (0.55, 0.53, 0.49), 0.85)
-    ceil_m = mat_principled('FoyerDecke', (0.88, 0.86, 0.82), 0.9)
-    floor_m = mat_noise('Eiche', (0.20, 0.13, 0.07), (0.38, 0.27, 0.16), 2.5, 0.45, 0.15)
+def build_foyer(style):
+    wall_m = mat_principled('wand', style['wall'], 0.85)
+    ceil_m = mat_principled('FoyerDecke', style['ceil'], 0.9)
     wood = mat_principled('FoyerHolz', (0.16, 0.10, 0.055), 0.4)
-    ink_m = mat_principled('FoyerSchrift', (0.08, 0.075, 0.07), 0.6)
+    ink_m = mat_principled('FoyerSchrift', style['ink'], 0.6)
+    floor_m = style['floor']()
     glow_portal = mat_emission('PortalLicht', (0.9, 0.95, 1.0), 3.0)
 
     W2, D2, H = FOY_W / 2, FOY_D / 2, FOY_H
@@ -572,19 +553,17 @@ def build_foyer():
 
     box('boden', (0, 0, -0.05), (FOY_W, FOY_D, 0.1), floor_m)
     box('decke', (0, 0, H + 0.05), (FOY_W + 2 * T, FOY_D + 2 * T, 0.1), ceil_m)
-    box('wand-e', (W2 + T / 2, 0, H / 2), (T, FOY_D, H), wall_m)
+    wall_x('wand-n', -D2 - T / 2, FOY_W, H, T, wall_m)
+    wall_y('wand-e', W2 + T / 2, FOY_D, H, T, wall_m)
 
-    # Nordwand: Tür zum Salon (x=0)
-    wall_with_door('tuer-salon', 'n', 0.0, FOY_W, H, -D2 - T / 2, T, wall_m,
-                   wood, (1.0, 0.88, 0.68), 1.6)
-    # Westwand: Tür zum White Cube (y=0)
-    wall_with_door('tuer-wc', 'w', 0.0, FOY_D, H, -W2 - T / 2, T, wall_m,
-                   wood, (1.0, 1.0, 1.0), 1.6)
+    # Westwand: Tür zur Halle (y=0)
+    wall_y('wand-w', -W2 - T / 2, FOY_D, H, T, wall_m,
+           openings=[(0.0, DOOR_W, 0, DOOR_H)])
+    door_frame('tuer-halle', 'w', 0.0, FOY_W, FOY_D, wood, style['doorglow'], 1.8)
 
     # Südwand: Eingangsportal (verglast, helles Aussenlicht)
-    box('wand-s-l', ((-W2 - 0.9) / 2 - 0.0, D2 + T / 2, H / 2), (W2 - 0.9 + W2 + T, T, H), wall_m)
-    box('wand-s-r', ((W2 + 0.9) / 2 + 0.0, D2 + T / 2, H / 2), (W2 - 0.9 + T, T, H), wall_m)
-    box('portal-sturz', (0, D2 + T / 2, (2.4 + H) / 2), (1.8, T, H - 2.4), wall_m)
+    wall_x('wand-s', D2 + T / 2, FOY_W, H, T, wall_m,
+           openings=[(0.0, 1.8, 0, 2.4)])
     box('portal-rahmen-l', (-0.9, D2, 1.2), (0.08, 0.16, 2.4), wood)
     box('portal-rahmen-r', (0.9, D2, 1.2), (0.08, 0.16, 2.4), wood)
     box('portal-rahmen-o', (0, D2, 2.4), (1.88, 0.16, 0.08), wood)
@@ -596,8 +575,8 @@ def build_foyer():
     bpy.ops.object.transform_apply(scale=True)
     p.data.materials.append(glow_portal)
 
-    # Wandschrift über der Salon-Tür (Nordwand)
-    add_walltext(ink_m, x=0.0, y=-D2 + 0.02, z=2.75, sub=2.48)
+    # Wandschrift Nordwand
+    add_walltext(ink_m, 0.0, -D2 + 0.02, z=1.9, sub=1.62)
 
     # Bank
     box('bank-sitz', (1.6, 1.6, 0.42), (1.6, 0.45, 0.08), wood)
@@ -614,27 +593,46 @@ def build_foyer():
         shade.data.materials.append(wood)
 
 
-def lights_foyer():
-    def point(loc, energy, color, size=0.12):
-        bpy.ops.object.light_add(type='POINT', location=loc)
-        l = bpy.context.active_object
-        l.data.energy = energy
-        l.data.color = color
-        l.data.shadow_soft_size = size
-
-    point((-1.5, 0.5, FOY_H - 0.95), 130, (1.0, 0.86, 0.66))
-    point((1.5, 0.5, FOY_H - 0.95), 130, (1.0, 0.86, 0.66))
-    point((0, -1.5, 2.5), 60, (1.0, 0.94, 0.85))
-
-    world = bpy.data.worlds.new('Welt')
-    world.use_nodes = True
-    bg = world.node_tree.nodes['Background']
-    bg.inputs['Color'].default_value = (0.4, 0.4, 0.42, 1)
-    bg.inputs['Strength'].default_value = 0.4
-    bpy.context.scene.world = world
+def lights_foyer(style):
+    point_light((-1.5, 0.5, FOY_H - 0.95), 130, (1.0, 0.86, 0.66), 0.12)
+    point_light((1.5, 0.5, FOY_H - 0.95), 130, (1.0, 0.86, 0.66), 0.12)
+    point_light((0, -1.5, 2.5), 60, (1.0, 0.94, 0.85))
+    grey_world(0.4, style['world'])
 
 
-# ── Garten ───────────────────────────────────────────────
+def build_kabinett(style):
+    wall_m = mat_principled('wand', style['wall'], 0.85)
+    ceil_m = mat_principled('KabDecke', style['ceil'], 0.9)
+    frame_m = mat_principled('Rahmen', style['frame'], 0.45)
+    plaque_m = mat_principled('Plakette', style['plaque'], 0.6)
+    ink_m = mat_principled('Schrift', style['ink'], 0.6)
+    wood = mat_principled('KabHolz', (0.16, 0.10, 0.055), 0.4)
+    floor_m = style['floor']()
+
+    W2, D2, H = KAB_W / 2, KAB_D / 2, KAB_H
+    T = 0.12
+
+    box('boden', (0, 0, -0.05), (KAB_W, KAB_D, 0.1), floor_m)
+    box('decke', (0, 0, H + 0.05), (KAB_W + 2 * T, KAB_D + 2 * T, 0.1), ceil_m)
+    wall_x('wand-n', -D2 - T / 2, KAB_W, H, T, wall_m)
+    wall_x('wand-s', D2 + T / 2, KAB_W, H, T, wall_m)
+    wall_y('wand-e', W2 + T / 2, KAB_D, H, T, wall_m)
+
+    # Westwand: Tür zurück zur Halle (y=0)
+    wall_y('wand-w', -W2 - T / 2, KAB_D, H, T, wall_m,
+           openings=[(0.0, DOOR_W, 0, DOOR_H)])
+    door_frame('tuer-halle', 'w', 0.0, KAB_W, KAB_D, wood, style['doorglow'], 1.8)
+
+    add_werke(KAB_WERKE, KAB_W, KAB_D, frame_m, plaque_m, ink_m)
+
+
+def lights_kabinett(style):
+    point_light((0, 0, KAB_H - 0.5), 220, style['light'], 0.2)
+    point_light((0, -1.5, 2.4), 70, (1.0, 0.95, 0.88))
+    grey_world(0.4, style['world'])
+
+
+# ── Garten (geteilt) ─────────────────────────────────────
 
 def build_garten():
     grass = mat_noise('Rasen', (0.02, 0.05, 0.012), (0.10, 0.20, 0.05), 4.0, 1.0, 0.35)
@@ -653,7 +651,6 @@ def build_garten():
 
     box('rasen', (0, 0, -0.06), (GAR + 4, GAR + 4, 0.12), grass)
 
-    # Hecken (ragen über das Sichtfeld hinaus)
     for tag, loc, dims in (
             ('n', (0, -G2 - 0.3, 1.1), (GAR + 2, 0.6, 2.2)),
             ('s', (0, G2 + 0.3, 1.1), (GAR + 2, 0.6, 2.2)),
@@ -661,7 +658,7 @@ def build_garten():
             ('e', (G2 + 0.3, 0, 1.1), (0.6, GAR + 2, 2.2))):
         box('hecke-' + tag, loc, dims, hedge)
 
-    # Ausgang zum White Cube (Blender y=+G2, helles Portal in der Hecke)
+    # Ausgang zurück in die Halle (helles Portal in der Heckenwand)
     box('portal-l', (-0.75, G2 + 0.28, 1.15), (0.16, 0.66, 2.3), white)
     box('portal-r', (0.75, G2 + 0.28, 1.15), (0.16, 0.66, 2.3), white)
     box('portal-o', (0, G2 + 0.28, 2.34), (1.66, 0.66, 0.16), white)
@@ -711,13 +708,13 @@ def build_garten():
     # Steinbank
     box('steinbank', (2.6, 1.5, 0.22), (1.4, 0.45, 0.44), stone)
 
-    # Himmel (Nishita) + Sonne
+    # Himmel + Sonne
     world = bpy.data.worlds.new('Himmel')
     world.use_nodes = True
     nt = world.node_tree
     bg = nt.nodes['Background']
     sky = nt.nodes.new('ShaderNodeTexSky')
-    sky.sky_type = 'MULTIPLE_SCATTERING'   # Blender 5.0 (ehemals Nishita)
+    sky.sky_type = 'MULTIPLE_SCATTERING'
     sky.sun_elevation = math.radians(38)
     sky.sun_rotation = math.radians(65)
     sky.altitude = 0.2
@@ -735,7 +732,38 @@ def lights_garten():
     pass  # Sonne und Himmel werden in build_garten gesetzt
 
 
-# ── Kamera & Render ──────────────────────────────────────
+# ── Stile, Kamera & Render ───────────────────────────────
+
+STYLE_WC = {
+    'wall': (0.93, 0.93, 0.92), 'ceil': (0.95, 0.95, 0.94),
+    'frame': (0.07, 0.07, 0.07), 'plaque': (0.97, 0.97, 0.96),
+    'ink': (0.05, 0.05, 0.05), 'floor': lambda: mat_principled('BodenWeiss', (0.62, 0.615, 0.60), 0.42),
+    'doorglow': (1.0, 0.95, 0.88), 'light': (1.0, 1.0, 1.0),
+    'world': (0.9, 0.9, 0.9),
+}
+
+STYLE_SALON = {
+    'wall': (0.283, 0.306, 0.235), 'ceil': (0.82, 0.79, 0.72),
+    'frame': (0.16, 0.11, 0.05), 'plaque': (0.93, 0.92, 0.89),
+    'ink': (0.05, 0.045, 0.04), 'floor': mat_floor_dark,
+    'doorglow': (1.0, 0.88, 0.68), 'light': (1.0, 0.86, 0.66),
+    'world': (0.32, 0.33, 0.35),
+}
+
+THEMES = {
+    'white-cube-foyer':    (lambda: build_foyer(STYLE_WC),
+                            lambda: lights_foyer(STYLE_WC), FOY_ST),
+    'white-cube-halle':    (build_wc_halle, lights_wc_halle, HALL_ST),
+    'white-cube-kabinett': (lambda: build_kabinett(STYLE_WC),
+                            lambda: lights_kabinett(STYLE_WC), KAB_ST),
+    'salon-foyer':         (lambda: build_foyer(STYLE_SALON),
+                            lambda: lights_foyer(STYLE_SALON), FOY_ST),
+    'salon-halle':         (build_salon_halle, lights_salon_halle, HALL_ST),
+    'salon-kabinett':      (lambda: build_kabinett(STYLE_SALON),
+                            lambda: lights_kabinett(STYLE_SALON), KAB_ST),
+    'garten':              (build_garten, lights_garten, GAR_ST),
+}
+
 
 def make_camera():
     bpy.ops.object.camera_add()
@@ -775,14 +803,6 @@ def configure(scene, width, height, samples):
         pass
 
 
-THEMES = {
-    'foyer': (build_foyer, lights_foyer),
-    'white-cube': (build_white_cube, lights_white_cube),
-    'salon': (build_salon, lights_salon),
-    'garten': (build_garten, lights_garten),
-}
-
-
 def main():
     global FONT_TITLE, FONT_META
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -798,11 +818,10 @@ def main():
         FONT_TITLE = load_font('/System/Library/Fonts/Supplemental/Georgia Italic.ttf')
         FONT_META = load_font('/System/Library/Fonts/Helvetica.ttc')
         scene = bpy.context.scene
-        build, lights = THEMES[name]
+        build, lights, stations = THEMES[name]
         build()
         lights()
         cam = make_camera()
-        stations = STATIONS[name]
 
         if preview:
             configure(scene, 2048, 1024, 64)
@@ -813,7 +832,7 @@ def main():
             print('PREVIEW:', scene.render.filepath)
             continue
 
-        configure(scene, 4096, 2048, 256)
+        configure(scene, 4096, 2048, 192)
         todo = range(len(stations)) if only is None else [only]
         for i in todo:
             cam.location = (-stations[i][0], stations[i][1], EYE)   # x gespiegelt
